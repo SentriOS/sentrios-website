@@ -549,3 +549,10 @@ section[id], div[id]{scroll-margin-top:90px}
 .qbee-frame{display:inline-block;max-width:100%;margin:28px auto 0;background:#EAEAEC;border:1px solid rgba(242,186,0,.28);border-radius:20px;padding:14px;box-shadow:0 34px 80px -36px rgba(0,0,0,.75)}
 .qbee-frame img{display:block;width:auto;max-width:100%;max-height:58vh;border-radius:10px;margin:0 auto}
 @media (max-width:680px){.qbee-frame{padding:10px;border-radius:14px}}
+
+/* contact form status message */
+.cform-status{font-size:14px;margin-top:4px;min-height:0}
+.cform-status:empty{display:none}
+.cform-status.ok{color:var(--ok)}
+.cform-status.err{color:var(--bad)}
+.cform-status a{color:var(--gold);text-decoration:underline}
