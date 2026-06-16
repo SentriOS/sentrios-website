@@ -503,3 +503,7 @@ footer address a{color:var(--gold-bright)}
 
 /* anchor offset under fixed nav */
 section[id], div[id]{scroll-margin-top:90px}
+
+/* hero deploy line + note (LK edits) */
+.hero-deploy{margin-top:26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(20px,2.4vw,26px);color:var(--gold-bright)}
+.hero-note{margin-top:14px;font-size:14.5px;color:var(--mute);max-width:52ch}
