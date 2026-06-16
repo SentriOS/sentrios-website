@@ -448,3 +448,58 @@ footer address a{color:var(--gold-bright)}
   .foot-grid{grid-template-columns:1fr}
   .abc-row{grid-template-columns:40px 1fr}
 }
+
+/* ============ v2: dropdown nav, contact, hero highlight ============ */
+.dropdown{position:relative;display:flex;align-items:center}
+.ddbtn{background:none;border:0;cursor:pointer;font-family:'Inter',sans-serif;font-size:14.5px;color:#C8C4BC;font-weight:500;display:inline-flex;align-items:center;gap:6px;padding:0}
+.ddbtn:hover,.dropdown:hover .ddbtn,.dropdown .ddbtn.active{color:var(--gold)}
+.ddbtn .caret{font-size:9px;transition:transform .2s}
+.dropdown:hover .ddbtn .caret{transform:rotate(180deg)}
+.ddmenu{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);min-width:230px;background:rgba(16,16,20,.98);backdrop-filter:blur(14px);border:1px solid var(--line-dk);border-radius:14px;padding:8px;margin-top:8px;opacity:0;visibility:hidden;transition:opacity .18s,transform .18s;box-shadow:0 24px 60px -24px rgba(0,0,0,.85)}
+.dropdown:hover .ddmenu{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.ddmenu::before{content:"";position:absolute;top:-16px;left:0;right:0;height:16px}
+.ddmenu a{display:block;padding:11px 14px;border-radius:9px;font-size:14.5px;color:#E0DCD3;font-weight:500}
+.ddmenu a:hover{background:rgba(242,186,0,.12);color:var(--gold)}
+.ddmenu a .d{display:block;font-size:12px;color:var(--mute);margin-top:3px;font-weight:400}
+
+/* hero "talks" highlight */
+.talks{margin-top:24px;display:inline-flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15.5px;color:#1A1408;background:var(--gold);border-radius:999px;padding:11px 20px;box-shadow:0 10px 30px -12px rgba(242,186,0,.6)}
+.talks svg{width:18px;height:18px;stroke:#1A1408;fill:none;stroke-width:2}
+
+/* who-is-this-for section dividers */
+.aud-section{padding-top:56px;margin-top:56px;border-top:1px solid var(--line-dk)}
+.aud-section:first-of-type{border-top:0;margin-top:40px;padding-top:0}
+
+/* contact */
+.contact-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;margin-top:48px;align-items:start}
+.cform{display:flex;flex-direction:column;gap:18px}
+.cform .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cform label{font-size:11px;color:var(--mute);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:block}
+.cform input,.cform textarea{width:100%;background:rgba(20,20,24,.6);border:1px solid var(--line-dk);border-radius:12px;padding:13px 15px;color:var(--txt-lt);font-family:'Inter',sans-serif;font-size:15px}
+.cform input::placeholder,.cform textarea::placeholder{color:#6F6B63}
+.cform input:focus,.cform textarea:focus{outline:none;border-color:var(--gold)}
+.cform textarea{min-height:130px;resize:vertical}
+.cinfo{border:1px solid var(--line-dk);border-radius:var(--r);padding:10px 26px;background:rgba(20,20,24,.4)}
+.cinfo .crow{display:flex;gap:15px;align-items:flex-start;padding:20px 0;border-bottom:1px solid var(--line-dk)}
+.cinfo .crow:last-child{border-bottom:0}
+.cinfo .crow svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;margin-top:3px}
+.cinfo .crow .k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.cinfo .crow a,.cinfo .crow p{font-size:16px;color:var(--txt-lt);line-height:1.5}
+.cinfo .crow a:hover{color:var(--gold)}
+.cnote{font-size:12.5px;color:var(--mute-dk);margin-top:4px}
+
+@media (max-width:960px){
+  .contact-grid{grid-template-columns:1fr;gap:34px}
+}
+@media (max-width:680px){
+  .dropdown{flex-direction:column;align-items:flex-start;width:100%;gap:4px}
+  .ddbtn{font-size:17px}
+  .ddbtn .caret{display:none}
+  .ddmenu{position:static;transform:none;opacity:1;visibility:visible;min-width:0;background:none;border:0;box-shadow:none;padding:2px 0 0 16px;margin:0;backdrop-filter:none}
+  .ddmenu::before{display:none}
+  .ddmenu a{padding:8px 0;color:#C8C4BC}
+  .cform .row2{grid-template-columns:1fr}
+}
+
+/* anchor offset under fixed nav */
+section[id], div[id]{scroll-margin-top:90px}
