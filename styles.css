@@ -520,3 +520,28 @@ section[id], div[id]{scroll-margin-top:90px}
 .paper .deliver .d.start{background:linear-gradient(165deg,#FBF3D8,#fff);border-color:var(--line-lt)}
 .paper .deliver h4{color:var(--gold-deep)}
 .paper .deliver li{color:#2A2620}
+
+/* ===== integrations logo wall (home) ===== */
+.integ2{background:var(--cream);color:var(--txt-dk);padding:62px 0;border-top:1px solid var(--line-lt);border-bottom:1px solid var(--line-lt)}
+.integ2 .ilab{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);text-align:center;margin-bottom:10px}
+.integ2 h2{text-align:center;font-size:clamp(22px,2.6vw,30px);color:#100E0A}
+.igroup{margin-top:34px}
+.igroup .gl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8A8474;text-align:center;margin-bottom:20px}
+.iwall{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:26px 52px}
+.iwall img{height:30px;width:auto;display:block}
+.iwall img.ms{height:38px}
+.iwall img.ad{height:42px}
+.iwall .wm{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;color:#6A6456;letter-spacing:-.01em}
+.idivider{height:1px;background:var(--line-lt);max-width:680px;margin:40px auto 34px}
+.partner{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:26px;justify-content:center;flex-wrap:wrap;background:#fff;border:1px solid var(--gold);border-radius:16px;padding:22px 30px;box-shadow:0 16px 44px -24px rgba(40,30,0,.28)}
+.partner .pleft{display:flex;flex-direction:column;align-items:center;gap:12px;padding-right:26px;border-right:1px solid var(--line-lt)}
+.partner .pl{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep)}
+.partner .pl svg{width:16px;height:16px;stroke:var(--gold-deep);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.partner .pleft img{height:30px}
+.partner .pd{font-size:14px;color:#544F44;max-width:32ch}
+.tm-note{text-align:center;font-size:11.5px;color:#9A968C;margin-top:32px}
+@media (max-width:680px){
+  .iwall{gap:22px 34px}
+  .iwall img{height:26px}.iwall img.ms{height:32px}.iwall .wm{font-size:19px}
+  .partner .pleft{border-right:0;border-bottom:1px solid var(--line-lt);padding-right:0;padding-bottom:18px}
+}
