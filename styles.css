@@ -514,3 +514,9 @@ section[id], div[id]{scroll-margin-top:90px}
 .paper .opp .pd.diff b{color:var(--gold-deep)}
 .paper .opp-head .k{color:var(--gold-deep)}
 .paper .ihero-stats .l{color:#5A554A}
+
+/* utilities use-case boxes (paper bg) — light box, dark text */
+.paper .deliver .d{background:#fff;border-color:var(--line-lt)}
+.paper .deliver .d.start{background:linear-gradient(165deg,#FBF3D8,#fff);border-color:var(--line-lt)}
+.paper .deliver h4{color:var(--gold-deep)}
+.paper .deliver li{color:#2A2620}
