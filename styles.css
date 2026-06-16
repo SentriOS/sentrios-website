@@ -41,7 +41,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:1
 header.nav{position:fixed;top:0;left:0;right:0;z-index:80;background:rgba(11,11,13,.72);backdrop-filter:blur(14px);border-bottom:1px solid rgba(242,186,0,.10)}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px}
 .brand{display:flex;align-items:center;gap:11px}
-.brand img{height:34px;width:auto}
+.brand img{height:44px;width:auto}
 .navlinks{display:flex;align-items:center;gap:26px}
 .navlinks a{font-size:14.5px;color:#C8C4BC;font-weight:500;transition:color .18s}
 .navlinks a:hover,.navlinks a.active{color:var(--gold)}
