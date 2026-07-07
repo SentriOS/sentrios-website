@@ -3,49 +3,62 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SentriOS for Utilities — Vision-Language AI for utility operations</title>
-<meta name="description" content="On-prem Vision-Language AI for utility operations. Cut substation false alarms 90–95%, augment wildfire & PSPS observers, and co-develop tailored inspection VLMs — behind your firewall, NERC-CIP aligned. Live in 2–4 weeks." />
+<title>SentriOS — Advancing Utility Operations with Vision-Language AI</title>
+<meta name="description" content="SentriOS turns existing utility cameras into intelligent operators: substation security with 90–95% fewer false alarms, wildfire & PSPS observation, and co-developed inspection VLMs — on-prem, behind your firewall." />
 <meta name="theme-color" content="#F2BA00" />
-<link rel="icon" href="logo.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body id="top">
-
 <header class="nav">
   <div class="wrap nav-inner">
     <a href="index.html" class="brand" aria-label="SentriOS home"><img src="logo-light.png" alt="SentriOS"></a>
     <nav class="navlinks" id="nav">
-      <a href="construction.html">Construction</a>
-      <a href="utilities.html" class="active">Utilities</a>
-      <a href="inspection.html">Inspection</a>
-      <a href="#opps">Opportunities</a>
-      <a href="https://app.sentrios.ai" class="mob-only">Sign in</a>
-      <a href="https://calendly.com/sai-sentrios/30min" class="mob-only">Book a Demo</a>
+      <a href="index.html">Home</a>
+      <div class="dropdown">
+        <button class="ddbtn" aria-haspopup="true">Product <span class="caret">&#9662;</span></button>
+        <div class="ddmenu">
+          <a href="agents.html">Agents<span class="d">The autonomous incident agent</span></a>
+          <a href="five-generations.html">Five Generations of AI<span class="d">Why the 5th generation wins</span></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="ddbtn active" aria-haspopup="true">Who is this for <span class="caret">&#9662;</span></button>
+        <div class="ddmenu">
+          <a href="construction.html">Construction trailers<span class="d">Security AI for job sites</span></a>
+          <a href="utilities.html">Utilities<span class="d">Advancing utility operations</span></a>
+          <a href="inspection.html">Inspection companies<span class="d">An AI co-inspector</span></a>
+        </div>
+      </div>
+      <a href="contact.html">Contact Us</a>
+      <a href="https://app.sentrios.ai" class="mob-only" target="_blank" rel="noopener">Sign in</a>
+      <a href="https://calendly.com/sai-sentrios/30min" class="mob-only" target="_blank" rel="noopener">Book a Demo</a>
     </nav>
     <div class="nav-cta">
-      <a href="https://app.sentrios.ai" class="signin">Sign in</a>
-      <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold">Book a Demo</a>
+      <a href="https://app.sentrios.ai" class="signin" target="_blank" rel="noopener">Sign in</a>
+      <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold" target="_blank" rel="noopener">Book a Demo</a>
       <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
-
 <main>
-<!-- HERO -->
 <section class="ihero">
   <div class="wrap">
     <div class="reveal">
-      <span class="eyebrow">For utility operations leaders</span>
-      <h1>Vision-Language AI for <span class="hl">utility operations.</span></h1>
-      <p class="sub">SentriOS turns any existing camera — Milestone, Genetec, Avigilon, Axis, Hanwha; fixed, PTZ, thermal, or mobile — into an intelligent operator. Where legacy computer vision detects objects, SentriOS understands situations using Vision-Language Models, multi-modal context, and natural-language rules. On-prem, behind your firewall. In discussions with major utilities across wildfire and physical-security workloads.</p>
+      <span class="eyebrow">Who is this for &middot; Utilities</span>
+      <h1>Advancing Utility Operations with <span class="hl">Vision-Language AI.</span></h1>
+      <p class="sub">SentriOS turns any existing camera into an intelligent operator &mdash; understanding smoke, fire, intrusion, access, and maintenance conditions in real time. Where legacy CV detects objects, SentriOS understands situations using VLMs, multi-modal context, and natural-language rules. Fully on-prem, behind your firewall.</p>
       <div class="ihero-cta">
-        <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold">Book a Demo <span class="arr">&rarr;</span></a>
-        <a href="#opps" class="btn btn-ghost">See the opportunities</a>
+        <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold" target="_blank" rel="noopener">Book a Demo <span class="arr">&rarr;</span></a>
+        <a href="five-generations.html" class="btn btn-ghost">Why VLMs</a>
       </div>
       <div class="ihero-stats">
-        <div class="s"><div class="v">90&ndash;95%</div><div class="l">Reduction in false alarms</div></div>
+        <div class="s"><div class="v">90&ndash;95%</div><div class="l">Fewer false alarms</div></div>
         <div class="s"><div class="v">5&ndash;10&times;</div><div class="l">Faster operator response</div></div>
         <div class="s"><div class="v">2&ndash;4 wks</div><div class="l">Go-live, no rip-and-replace</div></div>
       </div>
@@ -53,145 +66,79 @@
   </div>
 </section>
 
-<!-- TICKER -->
-<section class="ticker"><div class="wrap"><div class="track">
-  <span>FALSE ALARMS <b>&minus;90&ndash;95%</b></span><span>OPERATOR RESPONSE <b>5&ndash;10&times;</b></span><span>DEPLOYMENT <b>ON-PREM</b></span><span>ALIGNED TO <b>NERC-CIP</b></span><span>GO-LIVE <b>2&ndash;4 WKS</b></span>
-</div></div></section>
-
-<!-- OPPORTUNITIES -->
-<section class="band" id="opps">
+<section class="band paper">
   <div class="wrap">
-    <div class="reveal">
-      <span class="eyebrow">Where we start</span>
-      <h2 class="h-sec">Three high-value workloads. One platform.</h2>
-      <p class="lead">Each begins as a scoped, measurable pilot on the cameras and data you already have — behind your firewall, on a per-site model once it validates.</p>
+    <div class="reveal" style="text-align:center;max-width:60ch;margin:0 auto">
+      <span class="eyebrow" style="justify-content:center">The shift</span>
+      <h2 class="h-sec">From alerting tool to intelligent operator.</h2>
     </div>
-
-    <!-- 01 -->
-    <div class="opp reveal">
-      <div class="opp-head"><span class="num">01</span><div><div class="k">Opportunity</div><h3>Substation security — more insight, fewer false alarms.</h3></div></div>
-      <p class="pd"><b>The pain.</b> Substation perimeter analytics are dominated by rule-based CV that fires on motion, wildlife, weather, and shadows. Operators drown in noise, trust collapses, and 911-grade escalations get lost.</p>
-      <p class="pd diff"><b>The SentriOS difference.</b> A VLM-driven layer that filters alerts using context — who is on site, what is expected, when it occurs — and reasons across video, access control, weather, and schedules. The result is <b>10&ndash;100&times; fewer alerts</b>, and only the ones worth acting on.</p>
-      <div class="deliver">
-        <div class="d">
-          <h4>What SentriOS delivers</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>VLM platform that reasons about scenes, intent, and relationships — not bounding boxes</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Self-learning per-site baselines: worker schedules, vehicle flow, access patterns</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Native integration with your existing VMS — Milestone, Genetec, Avigilon, Axis, Hanwha</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>On-prem / air-gapped deployment for NERC-CIP and OT-aligned environments</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>RapidSOS connection for verified 911 escalation with GPS + situational context</li>
-          </ul>
-        </div>
-        <div class="d start">
-          <h4>How we start with you</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pick 1&ndash;10 substations with higher nuisance alarms for a &le;60-day paid pilot</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Share your camera + VMS inventory and current false-alarm metrics</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Define success with your ops team — target &ge;95% false-positive reduction</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Approve on-prem stand-up behind your firewall — we deploy in 2&ndash;4 weeks</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Flexible per-site SaaS expansion once the pilot validates</li>
-          </ul>
-        </div>
+    <div class="compare reveal">
+      <div class="cmp cmp-old">
+        <div class="ct">Without SentriOS</div>
+        <ul>
+          <li>Rule-based CV fires on wildlife, weather, and shadows</li>
+          <li>Operators drown in nuisance alarms; real events get lost</li>
+          <li>Wildfire and PSPS calls hinge on scarce human observers</li>
+          <li>Every dashboard is a separate silo to watch</li>
+        </ul>
       </div>
-    </div>
-
-    <!-- 02 -->
-    <div class="opp reveal">
-      <div class="opp-head"><span class="num">02</span><div><div class="k">Opportunity</div><h3>Wildfire &amp; PSPS — AI agents that augment human observers.</h3></div></div>
-      <p class="pd"><b>The pain.</b> Wildfire and PSPS decisions still depend on human observers and multiple dashboards. Observers are scarce, costly, and slow to dispatch. De-energization decisions affect thousands of customers — utilities need defensible, multi-modal, evidence-based decisions in real time.</p>
-      <p class="pd diff"><b>The SentriOS difference.</b> VLM-driven visual agents monitor existing or newly installed wildfire / circuit cameras 24/7, describe what they see in plain language, and fuse it with weather, fuel, satellite, and circuit telemetry. Operators ask questions in natural language and get <b>cited, ranked, impact-identified answers</b> with agent reasoning.</p>
-      <div class="nlq">
-        <div class="q">Show significant branch movement near circuit 14 in the last 6 hours, ranked by fire risk.</div>
-        <div class="a">3 events. Highest: 14:22, pole 14-87 — sustained limb contact, wind gusts 34 mph (HRRR), HFTD Tier 3. Cited: 2 frames + circuit telemetry. Recommend patrol before re-energization.</div>
-      </div>
-      <div class="deliver">
-        <div class="d">
-          <h4>What SentriOS delivers</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Promptable visual agents — define what to watch for in natural language</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Multi-modal fusion: video + weather (HRRR/GFS) + satellite + circuit telemetry</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Custom rules — "alert if smoke within 500m AND wind gusts &gt; 30 mph"</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Event search across months of footage, in plain language</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Live wildfire / PSPS dashboard with operator chat and audit trail</li>
-          </ul>
-        </div>
-        <div class="d start">
-          <h4>How we start with you</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Identify the wildfire / PSPS ops team and one priority circuit or HFTD zone</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Connect existing or new wildfire / circuit feeds — any camera, any VMS</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Interface with your ADMS / OMS / weather / fuel feeds — all inside your IT environment</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Run a 60-day live pilot during high fire activity, measured on coverage and PSPS decision quality &amp; latency</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- 03 -->
-    <div class="opp reveal">
-      <div class="opp-head"><span class="num">03</span><div><div class="k">Opportunity</div><h3>Co-develop tailored VLMs for asset inspection.</h3></div></div>
-      <p class="pd"><b>The pain.</b> Every utility has volumes of drone, helicopter, climber, and phone imagery — and single-task ML models that each need thousands of new labels per asset class. Adding a modality or defect type means starting over, and infraction calls stay inconsistent with limited rulebook citation.</p>
-      <p class="pd diff"><b>The SentriOS difference.</b> We co-develop a Vision-Language Model on your data, behind your firewall. It <b>warm-starts to Day-1 parity</b> with your existing model on your labels, then compounds 10&times; as it ingests new imagery and assimilates your O&amp;M manuals and standards — with every infraction cross-referenced to the relevant rule.</p>
-      <div class="deliver">
-        <div class="d">
-          <h4>What SentriOS delivers</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pretrained multi-utility VLM + 120K+ labeled asset images for warm-start</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Agentic ingestion of your O&amp;M procedures, NESC/IEEE, and internal standards</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>One model across modalities — drone RGB, thermal, helicopter, climber, phone</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>On-prem training + inference; you own the weights and the audit trail (SHA-256 chain)</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Active-learning loop — every SME correction compounds accuracy</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>10&times; target reduction in missed P1/P2 defects within a 16-week engagement</li>
-          </ul>
-        </div>
-        <div class="d start">
-          <h4>How we start with you</h4>
-          <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pick one circuit or substation cluster for a 12&ndash;16 week pilot</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Provide inspection imagery archives and your incumbent ML/CV baseline</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Commit ~4 hrs/wk of SME time for rulebook validation</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Deploy on a GPU server behind your firewall — we bring the spec</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Establish Day-1 parity benchmark and KPIs up front; expand once parity is hit</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>You keep the weights, the data, and the audit trails — no vendor lock-in</li>
-          </ul>
-        </div>
+      <div class="cmp cmp-new">
+        <div class="ct">With SentriOS</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Context-aware VLMs cut alerts 10&ndash;100&times;</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>90&ndash;95% fewer false alarms &mdash; an alert stream you trust</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Visual agents describe conditions in plain language, 24/7</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>On-prem / air-gapped, fused across video, weather &amp; telemetry</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DEPLOYMENT -->
-<section class="band paper" id="deploy">
+<section class="band paper" style="padding-top:0">
   <div class="wrap">
-    <div class="reveal">
-      <span class="eyebrow">Deployment &amp; compliance</span>
-      <h2 class="h-sec">Behind your firewall. Aligned to your obligations.</h2>
-      <p class="lead">SentriOS runs on-prem or air-gapped in OT-aligned environments, with the documentation utility regulators expect.</p>
+    <div class="opp reveal">
+      <div class="opp-head"><span class="num">01</span><div><div class="k">Use case</div><h3>Substation security &mdash; fewer false alarms.</h3></div></div>
+      <p class="pd"><b>The pain.</b> Rule-based CV fires on motion, wildlife, weather, and shadows. Operators drown in noise and real escalations get lost.</p>
+      <p class="pd diff"><b>The SentriOS difference.</b> A VLM layer that filters alerts using context &mdash; who is on site, what is expected, when &mdash; for <b>10&ndash;100&times; fewer alerts</b>, only the ones worth acting on.</p>
+      <div class="deliver">
+        <div class="d"><h4>What SentriOS delivers</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Reasons about scenes, intent, and relationships — not bounding boxes</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Self-learning per-site baselines</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Native integration with Milestone, Genetec, Avigilon, Axis, Hanwha</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>On-prem / air-gapped for NERC-CIP and OT-aligned environments</li></ul></div>
+        <div class="d start"><h4>How we start with you</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pick 1–10 substations with high nuisance alarms for a ≤60-day paid pilot</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Share your camera + VMS inventory and false-alarm metrics</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Target ≥95% false-positive reduction with your ops team</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Deploy behind your firewall in 2–4 weeks</li></ul></div>
+      </div>
     </div>
-    <div class="grid3">
-      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-4 8-8 10-4-2-8-5-8-10V6z"/></svg></div><div class="k">Sovereign</div><h3>On-prem &amp; air-gapped</h3><p>All video and model weights stay inside your IT environment. NERC-CIP and OT-aligned by design.</p></div>
-      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="k">Defensible</div><h3>SHA-256 audit chain</h3><p>Better-documented inspections and incidents for PUC / NERC review — a complete, tamper-evident record.</p></div>
-      <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></div><div class="k">Yours</div><h3>You own the model</h3><p>You keep the weights, the data, and the audit trails. No vendor lock-in — ever.</p></div>
+    <div class="opp reveal">
+      <div class="opp-head"><span class="num">02</span><div><div class="k">Use case</div><h3>Wildfire &amp; PSPS &mdash; augment human observers.</h3></div></div>
+      <p class="pd"><b>The pain.</b> Decisions depend on scarce, costly observers and many dashboards; de-energization affects thousands of customers.</p>
+      <p class="pd diff"><b>The SentriOS difference.</b> Visual agents monitor cameras 24/7, describe what they see in plain language, and fuse it with weather, fuel, satellite, and circuit telemetry &mdash; with <b>cited, ranked, impact-identified answers</b>.</p>
+      <div class="deliver">
+        <div class="d"><h4>What SentriOS delivers</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Promptable visual agents — define what to watch for in plain language</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Multi-modal fusion: video + weather (HRRR/GFS) + satellite + telemetry</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Custom rules and event search across months of footage</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Live PSPS dashboard with operator chat and audit trail</li></ul></div>
+        <div class="d start"><h4>How we start with you</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Identify the PSPS ops team and one priority circuit or HFTD zone</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Connect existing or new wildfire / circuit feeds — any camera, any VMS</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Interface with ADMS / OMS / weather / fuel feeds in your environment</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Run a 60-day live pilot measured on coverage and decision latency</li></ul></div>
+      </div>
+    </div>
+    <div class="opp reveal">
+      <div class="opp-head"><span class="num">03</span><div><div class="k">Use case</div><h3>Co-develop tailored VLMs for asset inspection.</h3></div></div>
+      <p class="pd"><b>The pain.</b> Volumes of drone, helicopter, climber, and phone imagery &mdash; and single-task models that each need thousands of new labels. Adding a modality means starting over.</p>
+      <p class="pd diff"><b>The SentriOS difference.</b> We co-develop a VLM on your data, behind your firewall. It <b>warm-starts to Day-1 parity</b>, then compounds 10&times; as it ingests new imagery and your O&amp;M manuals &mdash; every infraction cited to the rule.</p>
+      <div class="deliver">
+        <div class="d"><h4>What SentriOS delivers</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pretrained multi-utility VLM + 120K+ labeled images for warm-start</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>One model across drone RGB, thermal, helicopter, climber, phone</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>On-prem training + inference; you own the weights and audit trail (SHA-256)</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>10× target reduction in missed P1/P2 defects in 16 weeks</li></ul></div>
+        <div class="d start"><h4>How we start with you</h4><ul><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Pick one circuit or substation cluster for a 12–16 week pilot</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Provide imagery archives and your incumbent ML/CV baseline</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>~4 hrs/wk of SME time for rulebook validation</li><li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>You keep the weights, data, and audit trails — no vendor lock-in</li></ul></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
 <section class="band cta" id="demo">
   <div class="wrap">
-    <span class="eyebrow" style="justify-content:center">Next steps</span>
-    <h2>A 30-minute working session with your <span class="hl">ops team.</span></h2>
-    <p class="lead">Bring your security, wildfire, or inspection operations leads. We'll scope a measurable pilot on the cameras and data you already run — behind your firewall.</p>
+    <span class="eyebrow" style="justify-content:center">Book a demo</span>
+    <h2>Find the right fit for <span class="hl">your sites.</span></h2>
+    <p class="lead">A 30-minute working session &mdash; bring your camera and VMS inventory, and we'll map the agentic layer to what you already run.</p>
     <div class="cta-row">
-      <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold">Book a Demo <span class="arr">&rarr;</span></a>
-      <a href="mailto:info@sentrios.ai?subject=SentriOS%20Utilities%20Pilot" class="btn btn-ghost">Talk to the team</a>
+      <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold" target="_blank" rel="noopener">Book a Demo <span class="arr">&rarr;</span></a>
+      <a href="contact.html" class="btn btn-ghost">Contact us</a>
     </div>
-    <div class="cta-tags"><span>Substation security</span><span>Wildfire &amp; PSPS</span><span>Asset inspection VLMs</span></div>
+    <div class="cta-tags"><span>Substation security</span><span>Wildfire & PSPS</span><span>Asset inspection VLMs</span></div>
   </div>
-</section>
-</main>
-
+</section></main>
 <footer>
   <div class="wrap">
     <div class="foot-grid">
@@ -199,11 +146,11 @@
         <a href="index.html" class="brand" aria-label="SentriOS home"><img src="logo-light.png" alt="SentriOS"></a>
         <p>The agentic AI layer for critical infrastructure. From detection to resolution — autonomously.</p>
       </div>
-      <div><h5>Industries</h5><a class="flink" href="construction.html">Construction trailers</a><a class="flink" href="utilities.html">Utilities</a><a class="flink" href="inspection.html">Inspection</a></div>
-      <div><h5>Platform</h5><a class="flink" href="index.html#sms">Two-way chat</a><a class="flink" href="index.html#how">How it works</a><a class="flink" href="index.html#generations">Five Generations</a><a class="flink" href="https://app.sentrios.ai">Sign in</a></div>
-      <div><h5>Contact</h5><address><a href="mailto:info@sentrios.ai">info@sentrios.ai</a><br><a href="https://www.sentrios.ai">www.sentrios.ai</a><br>6170 Cornerstone Court East, Suite 100<br>San Diego, CA 92121</address><a class="flink" style="margin-top:12px" href="https://calendly.com/sai-sentrios/30min">Book a demo &rarr;</a></div>
+      <div><h5>Product</h5><a class="flink" href="agents.html">Agents</a><a class="flink" href="agents.html#sms">Two-way chat</a><a class="flink" href="five-generations.html">Five Generations of AI</a></div>
+      <div><h5>Company</h5><a class="flink" href="construction.html">Construction</a><a class="flink" href="utilities.html">Utilities</a><a class="flink" href="inspection.html">Inspection</a><a class="flink" href="contact.html">Contact us</a><a class="flink" href="https://app.sentrios.ai" target="_blank" rel="noopener">Sign in</a></div>
+      <div><h5>Contact</h5><address><a href="mailto:info@sentrios.ai">info@sentrios.ai</a><br><a href="https://www.sentrios.ai">www.sentrios.ai</a><br>6170 Cornerstone Court East, Suite 100<br>San Diego, CA 92121</address><a class="flink" style="margin-top:12px" href="https://calendly.com/sai-sentrios/30min" target="_blank" rel="noopener">Book a demo &rarr;</a></div>
     </div>
-    <div class="foot-bottom"><span>© <span id="yr"></span> SentriOS. All rights reserved.</span><span class="mono">Eyes on every site.</span></div>
+    <div class="foot-bottom"><span>&copy; <span id="yr"></span> SentriOS. All rights reserved.</span><span class="mono">Eyes on every site.</span></div>
   </div>
 </footer>
 <script src="app.js"></script>
