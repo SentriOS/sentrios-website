@@ -63,6 +63,11 @@
 
     var mode = "fleet", preset = "cons";
 
+    // Site monitoring rate is $0 (no monitoring today) or $100–$250. Nothing between.
+    var SITE_RATES = (function(){var a=[0],v; for(v=100;v<=250;v+=5){a.push(v);} return a;})();
+    var NO_MON_MISS = 100;  // with no monitoring, nothing is intercepted
+    var NO_MON_INC  = 3;    // theft events per site per year, borne in full
+
     var P = {
       fleet:{
         cons:{trailers:200,monPct:70,cams:3,rate:120,rev:1000,depNow:2,tech:85,months:9,churnNow:15,extra1:0,extra2:0},
@@ -84,7 +89,7 @@
         {k:"monPct",  l:"Share on monitored contracts",h:"Units where a customer pays for monitoring, %",min:10,max:100,step:5},
         {k:"cams",    l:"Cameras or streams per trailer",h:"",min:1,max:5,step:1},
         {g:"Your economics today"},
-        {k:"rate",  l:"What monitoring costs you per stream",h:"$ per stream per month, paid to your monitoring provider",min:40,max:250,step:5},
+        {k:"rate",  l:"What monitoring costs you per stream",h:"$ per stream per month, paid to your monitoring provider",min:100,max:250,step:5},
         {k:"rev",   l:"What you charge per trailer",h:"$ per trailer per month, rental plus monitoring",min:400,max:3000,step:50},
         {k:"depNow",l:"Hours to deploy your current monitoring solution",h:"Technician time per trailer, as it works today",min:0.5,max:4,step:0.5},
         {k:"tech",  l:"Your loaded technician rate",h:"$ per hour",min:40,max:180,step:5},
@@ -99,7 +104,7 @@
         {k:"sites",l:"Active job sites",h:"Sites running at any one time",min:1,max:300,step:1},
         {k:"cams", l:"Cameras per site",h:"",min:2,max:40,step:1},
         {g:"What you spend today"},
-        {k:"rate",l:"What monitoring costs you per stream",h:"$ per stream per month. Enter 0 if you have no monitoring today.",min:0,max:250,step:5},
+        {k:"rate",l:"What monitoring costs you per stream",h:"$ per stream per month paid to your provider, from $100. Enter 0 if you have no monitoring today — the model then assumes nothing is intercepted and 3 theft events per site per year.",min:0,max:250,step:5,vals:SITE_RATES},
         {g:"What happens when something goes wrong"},
         {k:"inc", l:"Theft or loss events per site",h:"Per site per year, attempted or successful",min:0,max:6,step:0.1},
         {k:"loss",l:"Average material loss per event",h:"$ — tools, copper, fuel, equipment",min:0,max:60000,step:500},
@@ -132,6 +137,8 @@
     function money(n){var neg=n<0; n=Math.round(Math.abs(n)); return (neg?"−$":"$")+n.toLocaleString("en-US");}
     function num(n,d){return Number(n).toFixed(d||0);}
     function pct(n){return num(n,0)+"%";}
+    function nearestIdx(vals,v){var bi=0,bd=Infinity,i,d; for(i=0;i<vals.length;i++){d=Math.abs(vals[i]-v); if(d<bd){bd=d;bi=i;}} return bi;}
+    function snapVal(f,v){return f.vals ? f.vals[nearestIdx(f.vals,v)] : Math.min(f.max,Math.max(f.min,v));}
     function fill(el){ if(!el) return; var mn=+el.min, mx=+el.max, v=+el.value;
       el.style.setProperty("--pct", (mx>mn ? (v-mn)/(mx-mn)*100 : 0)+"%"); }
 
@@ -175,15 +182,17 @@
       var cash = cams * (s.rate - PRICE) * 12;
       var spend = cams * PRICE * 12;
 
+      var noMon       = s.rate === 0;
+      var missEff     = noMon ? NO_MON_MISS : s.missNow;
       var incidents   = s.sites * s.inc;
       var exposure    = s.loss + s.down;
-      var intercepted = incidents * (s.missNow - SENT_MISS)/100;
+      var intercepted = incidents * (missEff - SENT_MISS)/100;
       var lossVal     = Math.max(0, intercepted) * exposure;
       var adminVal    = incidents * s.adminH * s.adminR * 0.9;
 
       var net  = cash + lossVal + adminVal;
       var ret  = spend>0 ? (cams*s.rate*12 + lossVal + adminVal)/spend : 0;
-      return {cams:cams,cash:cash,incidents:incidents,exposure:exposure,
+      return {cams:cams,cash:cash,incidents:incidents,exposure:exposure,noMon:noMon,missEff:missEff,
         intercepted:Math.max(0,intercepted),lossVal:lossVal,adminVal:adminVal,
         net:net,ret:ret,y1:net*(s.months/12),perCam:cams>0?net/cams:0};
     }
@@ -202,23 +211,60 @@
           '<input type="range" id="roi-rg-'+f.k+'" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" aria-labelledby="'+id+'">';
         box.appendChild(wrap);
         var n=$(id), r=$("roi-rg-"+f.k);
-        n.value=num(S[mode][f.k],dec); r.value=S[mode][f.k]; fill(r);
+        if(f.vals){ r.min=0; r.max=f.vals.length-1; r.step=1; }
+        paint(S[mode][f.k]);
+        function paint(v){ n.value=num(v,dec); r.value=f.vals?nearestIdx(f.vals,v):v; fill(r); }
         function set(v){
-          v=parseFloat(v); if(isNaN(v)) v=f.min;
-          v=Math.min(f.max,Math.max(f.min,v));
-          S[mode][f.k]=v; n.value=num(v,dec); r.value=v; fill(r); render();
+          v=parseFloat(v); if(isNaN(v)) v=f.vals?f.vals[0]:f.min;
+          v=snapVal(f,v);
+          S[mode][f.k]=v; paint(v); afterChange(f.k); render();
         }
-        r.addEventListener("input",function(){set(r.value);});
+        r.addEventListener("input",function(){set(f.vals?f.vals[+r.value]:r.value);});
         n.addEventListener("input",function(){
           var v=parseFloat(n.value); if(isNaN(v))return;
-          S[mode][f.k]=Math.min(f.max,Math.max(f.min,v)); r.value=S[mode][f.k]; fill(r); render();
+          v=snapVal(f,Math.min(f.max,Math.max(f.min,v)));
+          S[mode][f.k]=v; r.value=f.vals?nearestIdx(f.vals,v):v; fill(r); afterChange(f.k); render();
         });
         n.addEventListener("blur",function(){set(n.value);});
       });
+      if(mode==="site"){ lastRate=S.site.rate; lockMiss(S.site.rate===0); }
       $("roi-locks").innerHTML = LOCKS[mode].map(function(x){
         return '<div class="roi-lock"><span class="l">'+x.l+(x.h?'<span class="hint">'+x.h+'</span>':'')+
                '</span><span class="r">'+x.r+'</span></div>';
       }).join("");
+    }
+
+    /* No monitoring today: nothing is intercepted, and 3 events a site a year
+       land in full. The miss rate is forced and locked; the event count is set
+       once on the way in and stays editable. Both revert if a rate comes back. */
+    var lastRate=null, stashInc=null;
+    function syncField(k,v,dec){
+      var n=$("roi-in-"+k), r=$("roi-rg-"+k);
+      if(!n||!r) return;
+      n.value=num(v,dec||0); r.value=v; fill(r);
+    }
+    function lockMiss(on){
+      var n=$("roi-in-missNow"), r=$("roi-rg-missNow");
+      if(!n||!r) return;
+      var wrap=n.parentNode.parentNode, note=wrap.querySelector(".forced");
+      wrap.className="roi-field"+(on?" is-forced":"");
+      n.disabled=on; r.disabled=on;
+      n.value = on ? NO_MON_MISS : num(S.site.missNow,0);
+      if(on && !note){
+        note=document.createElement("div"); note.className="forced";
+        note.textContent="Forced to 100% — with no monitoring in place, nothing is intercepted before it happens.";
+        wrap.appendChild(note);
+      } else if(!on && note){ wrap.removeChild(note); }
+    }
+    function afterChange(k){
+      if(mode!=="site") return;
+      // if they overrode our 3 while at $0, that is their number now — do not undo it
+      if(k==="inc" && lastRate===0){ stashInc=null; return; }
+      if(k!=="rate") return;
+      var s=S.site, zero=(s.rate===0), wasZero=(lastRate===0);
+      if(zero && !wasZero){ stashInc=s.inc; s.inc=NO_MON_INC; syncField("inc",NO_MON_INC,1); }
+      else if(!zero && wasZero && stashInc!==null){ s.inc=stashInc; syncField("inc",stashInc,1); stashInc=null; }
+      lastRate=s.rate; lockMiss(zero);
     }
 
     function row(t,m,v,cls,extra){
@@ -270,7 +316,7 @@
         var q=calcSite(s);
         $("roi-dek").textContent="Two kinds of money are in play here, and they are not worth the same. One is an invoice you cancel. The other is a loss you avoid. This keeps them apart.";
         $("roi-ledger-title").textContent="Cash first, then risk";
-        $("roi-ledger-note").textContent=s.sites+" sites · "+q.cams.toLocaleString()+" streams";
+        $("roi-ledger-note").textContent=s.sites+" sites · "+q.cams.toLocaleString()+" streams"+(q.noMon?" · no monitoring today":"");
         $("roi-hero-lbl").textContent="Net annual benefit, after paying SentriOS";
         $("roi-hero-val").textContent=money(q.net);
         $("roi-hero-val").className="big "+sign(q.net);
@@ -282,7 +328,9 @@
               q.cams.toLocaleString()+" streams × 12 months at $"+num(s.rate)+", net of SentriOS",
               money(q.cash), sign(q.cash), "  roi-sub-total") +
           row("Losses intercepted",
-              num(q.intercepted,1)+" more events stopped × "+money(q.exposure)+" exposure — "+pct(s.missNow)+" missed today vs 2% with SentriOS",
+              q.noMon
+                ? num(q.intercepted,1)+" events stopped × "+money(q.exposure)+" exposure — with no monitoring you intercept nothing today, against 2% missed with SentriOS"
+                : num(q.intercepted,1)+" more events stopped × "+money(q.exposure)+" exposure — "+pct(q.missEff)+" missed today vs 2% with SentriOS",
               money(q.lossVal),"pos") +
           row("Reporting time recovered",
               num(q.incidents,1)+" events × "+num(s.adminH,1)+" hrs × $"+num(s.adminR)+", credited at a 90% reduction",
@@ -317,6 +365,7 @@
       var siteB =
         '<h4>How the job-site model works</h4><ul>'+
         '<li><b>The comparison is miss rate against miss rate.</b> Your current setup intercepts most events; the model credits SentriOS only with the difference between what you miss today and the 2% SentriOS misses.</li>'+
+        '<li><b>If you have no monitoring today, enter $0.</b> The miss rate is then forced to 100% — nothing is intercepted before it happens — and the event count is set to three per site per year, the figure unmonitored sites tend to run at. That event count stays yours to change; the miss rate does not.</li>'+
         '<li>Events are entered <b>per site per year</b> and multiplied by site count, so the answer scales the way a portfolio actually does.</li>'+
         '<li>Cash savings and avoided losses are never added together without a label. The first line is an invoice you cancel. Everything below it is an expected value — real over a portfolio and a year, lumpy on any single site.</li>'+
         '<li>Reporting time is credited at a 90% reduction, not 100% — someone still reviews the report.</li>'+
@@ -363,7 +412,9 @@
         out.push("Portfolio: "+s.sites+" active sites, "+s.cams+" cameras each ("+q.cams+" streams)");
         out.push("Monitoring today: $"+num(s.rate)+"/stream/mo. All figures below are net of SentriOS.");
         out.push("Events: "+num(s.inc,1)+"/site/yr, "+money(q.exposure)+" exposure each");
-        out.push("Miss rate today "+pct(s.missNow)+" vs 2% with SentriOS");
+        out.push(q.noMon
+          ? "No monitoring today: 100% missed, "+num(s.inc,1)+" events/site/yr assumed. SentriOS misses 2%."
+          : "Miss rate today "+pct(q.missEff)+" vs 2% with SentriOS");
         out.push("");
         out.push("Monitoring cash, net:             "+money(q.cash));
         out.push("Losses intercepted:               "+money(q.lossVal));

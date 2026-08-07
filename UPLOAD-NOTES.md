@@ -82,7 +82,7 @@ the rendered text. It passes.
 | Trailers in your fleet | 10–2,000 |
 | Share on monitored contracts | 10–100% |
 | Cameras or streams per trailer | **1–5** |
-| What monitoring costs you per stream | **$40–$250** |
+| What monitoring costs you per stream | **$100–$250** |
 | What you charge per trailer | $400–$3,000 |
 | Hours to deploy your current monitoring solution | **0.5–4 hrs** |
 | Your loaded technician rate | $40–$180/hr |
@@ -110,8 +110,25 @@ conservative, and stated in the basis panel.
 |---|---|
 | Events your setup misses today | **10–35%** |
 | Events SentriOS misses | **fixed at 2%**, shown as a locked fact, not editable |
-| What monitoring costs you per stream | $0–$250 |
+| What monitoring costs you per stream | **$0, or $100–$250** — nothing in between |
 | Discount on avoided losses | **removed** |
+
+**The no-monitoring case.** The rate slider's first stop is $0 and its second is
+$100; there is no dead zone to drag through and a typed $45 snaps to $0 while
+$60 snaps to $100. Entering $0 changes three things:
+
+- The miss rate is forced to **100%** and locked — the slider disappears, the
+  field turns red and carries the line "with no monitoring in place, nothing is
+  intercepted before it happens."
+- Theft events are set to **3 per site per year**, and stay editable. If a
+  prospect changes that number, their value survives even after they put a
+  monitoring rate back in — we only restore the pre-$0 value if they never
+  touched it.
+- The monitoring line goes negative, correctly: with nothing to cancel, they are
+  starting a new spend. At the Conservative preset that reads −$86,400 of cash
+  against $441,000 of intercepted loss, netting $367,236.
+
+Put a rate back in and the miss rate unlocks at whatever they last set it to.
 
 With the discount gone, intercepted losses and recovered reporting time now count
 at full value, so job-site numbers come out materially higher than the version
@@ -125,6 +142,10 @@ their stream count and their own rate, and the page shows the net. Same for
 churn — 14 trailers retained on 140 monitored from 15% implies the target. There
 is no way to show a net saving without that being derivable. Nothing is *stated*,
 which is what you asked for; just don't treat it as a secret in a room with a CFO.
+
+The clearest tell is the job-site slider: at exactly $100 per stream the
+"Monitoring cash, net" line reads $0. Anyone who drags the slider looking for the
+crossover finds the rate in about four seconds.
 
 ## Two things worth a decision before you publish
 

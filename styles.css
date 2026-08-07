@@ -675,6 +675,14 @@ section[id], div[id]{scroll-margin-top:90px}
 .roi-field input[type=range]::-moz-range-progress{height:5px;border-radius:999px;background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
 .roi-field input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--gold)}
 
+/* ---- a field the no-monitoring case takes over ---- */
+.roi-field.is-forced input[type=range]{display:none}
+.roi-field.is-forced label{opacity:.62}
+.roi-field.is-forced input[type=number]{color:var(--roi-cost);border-color:rgba(210,100,95,.55);
+  background:rgba(210,100,95,.09);cursor:not-allowed;opacity:1}
+.roi-field .forced{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;
+  color:var(--roi-cost);border-left:2px solid var(--roi-cost);padding-left:11px}
+
 /* ---- locked facts ---- */
 .roi-locks{padding:4px 22px 22px}
 .roi-lock{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 16px;
