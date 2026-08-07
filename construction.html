@@ -113,86 +113,64 @@
 <section class="band roi" id="roi">
   <div class="wrap">
     <div class="reveal roi-head">
-      <span class="eyebrow" style="justify-content:center">For trailer companies &middot; ROI calculator</span>
-      <h2 class="h-sec">See the ROI of agentic security.</h2>
-      <p class="lead">Move the sliders to match your fleet. Everything updates live &mdash; and every number is net of what you pay SentriOS.</p>
+      <span class="eyebrow" style="justify-content:center">ROI calculator</span>
+      <h2 class="h-sec">See what agentic security is worth to you.</h2>
+      <p class="lead" id="roi-dek">Two calculators, because a fleet owner and a builder are not solving the same problem. Every assumption is editable, every line shows its own arithmetic, and the default state is the conservative case.</p>
     </div>
 
-    <div class="roi-card reveal">
-      <!-- live total -->
-      <div class="roi-total">
-        <div class="lab">Estimated net annual savings</div>
-        <div class="num" id="roi-total">$0</div>
-        <div class="sub"><b id="roi-percam">$0</b> per camera / yr &nbsp;&middot;&nbsp; <b id="roi-return">0&times;</b> return &nbsp;&middot;&nbsp; SentriOS spend <b id="roi-spend">$0</b>/yr</div>
-      </div>
-
-      <div class="roi-bars">
-        <div class="roi-bar"><span class="bl">Without SentriOS</span>
-          <div class="track"><div class="fill without" id="roi-bar-without"></div><span class="bval" id="roi-without">$0</span></div></div>
-        <div class="roi-bar"><span class="bl">With SentriOS</span>
-          <div class="track"><div class="fill with" id="roi-bar-with"></div><span class="bval" id="roi-with">$0</span></div></div>
-      </div>
-
-      <div class="roi-div"></div>
-
-      <!-- sliders -->
-      <div class="roi-sliders">
-        <div class="roi-s">
-          <div class="top"><label class="name" for="roi-cams">Job-site cameras deployed</label><span class="val" id="roi-v-cams">100</span></div>
-          <input type="range" id="roi-cams" min="10" max="1000" step="10" value="100" aria-describedby="roi-v-cams">
-        </div>
-        <div class="roi-s">
-          <div class="top"><label class="name" for="roi-trad">Traditional monitoring <em>$ / camera / mo</em></label><span class="val" id="roi-v-trad">$150</span></div>
-          <input type="range" id="roi-trad" min="100" max="250" step="10" value="150" aria-describedby="roi-v-trad">
-        </div>
-        <div class="roi-s">
-          <div class="top"><label class="name" for="roi-inc">Theft / loss incidents per year</label><span class="val" id="roi-v-inc">2</span></div>
-          <input type="range" id="roi-inc" min="1" max="60" step="1" value="2" aria-describedby="roi-v-inc">
-        </div>
-        <div class="roi-s">
-          <div class="top"><label class="name" for="roi-hrs">PM/Admin hours to compile a report today</label><span class="val" id="roi-v-hrs">6</span></div>
-          <input type="range" id="roi-hrs" min="1" max="10" step="0.5" value="6" aria-describedby="roi-v-hrs">
+    <div class="roi-controls reveal">
+      <div>
+        <span class="roi-ctl-lab">Who are you</span>
+        <div class="roi-seg" role="group" aria-label="Choose your role">
+          <button type="button" id="roi-m-fleet" aria-pressed="true">I run a trailer fleet</button>
+          <button type="button" id="roi-m-site" aria-pressed="false">I run job sites</button>
         </div>
       </div>
-
-      <p class="roi-assume">Fixed benchmarks: <b>$10,000</b> material loss + <b>1 week</b> downtime (<b>$8,000/wk</b>) per incident &middot; <b>&lt;3%</b> missed with the construction VLM &middot; <b>$65/hr</b> admin. SentriOS replaces traditional monitoring at a flat $80/camera/month.</p>
-
-      <div class="roi-div"></div>
-
-      <!-- breakdown -->
-      <div class="roi-k">
-        <div class="roi-krow">
-          <span class="kn">01</span>
-          <span class="kname">Cost of monitoring</span>
-          <span class="kfig"><b id="roi-k1-without">$0</b> <span class="arw">&rarr;</span> <b class="to" id="roi-k1-with">$0</b></span>
-          <span class="ksave">Save <span id="roi-k1-save">$0</span></span>
-        </div>
-        <div class="roi-krow">
-          <span class="kn">02</span>
-          <span class="kname">Cost of missed alarms</span>
-          <span class="kfig"><b id="roi-k2-without">$0</b> <span class="arw">&rarr;</span> <b class="to" id="roi-k2-with">$0</b></span>
-          <span class="ksave">Save <span id="roi-k2-save">$0</span></span>
-        </div>
-        <div class="roi-krow">
-          <span class="kn">03</span>
-          <span class="kname">Incident response time</span>
-          <span class="kfig">20&ndash;30 min <span class="arw">&rarr;</span> <span class="to">13 sec</span></span>
-          <span class="ksave gold">~115&times;</span>
-        </div>
-        <div class="roi-krow">
-          <span class="kn">04</span>
-          <span class="kname">Time to reporting <em>(<span id="roi-k4-hours">0</span> hrs/yr saved)</em></span>
-          <span class="kfig">24&ndash;48 hrs <span class="arw">&rarr;</span> <span class="to">Minutes</span></span>
-          <span class="ksave">Save <span id="roi-k4-save">$0</span></span>
+      <div>
+        <span class="roi-ctl-lab">Assumption set</span>
+        <div class="roi-seg small" role="group" aria-label="Choose an assumption set">
+          <button type="button" data-roi-p="cons" aria-pressed="true">Conservative</button>
+          <button type="button" data-roi-p="exp" aria-pressed="false">Expected</button>
+          <button type="button" data-roi-p="agg" aria-pressed="false">Aggressive</button>
         </div>
       </div>
-
-      <div class="roi-cta">
-        <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-gold" target="_blank" rel="noopener">Book a working session <span class="arr">&rarr;</span></a>
-        <a href="contact.html" class="btn btn-ghost">Talk to us</a>
-      </div>
-      <p class="roi-disc">Estimates only, based on the inputs above. Actual results vary by site, camera coverage, and deployment. Savings are net of your SentriOS cost.</p>
     </div>
+
+    <div class="roi-cols reveal">
+      <div class="roi-card">
+        <div class="roi-card-hd">
+          <h3>Your inputs</h3>
+          <span class="note">type a value or drag</span>
+        </div>
+        <div class="roi-card-bd" id="roi-inputs"></div>
+        <div class="roi-locks" id="roi-locks"></div>
+      </div>
+
+      <div class="roi-card">
+        <div class="roi-card-hd">
+          <h3 id="roi-ledger-title">The arithmetic</h3>
+          <span class="note" id="roi-ledger-note">annual, steady state</span>
+        </div>
+        <div class="roi-hero">
+          <span class="lbl" id="roi-hero-lbl">Net annual benefit</span>
+          <div class="big" id="roi-hero-val">$0</div>
+          <div class="sub" id="roi-hero-sub"></div>
+        </div>
+        <div id="roi-ledger"></div>
+        <div class="roi-strip" id="roi-strip"></div>
+        <div class="roi-acts">
+          <button type="button" class="btn btn-gold" id="roi-copy">Copy summary</button>
+          <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-ghost" target="_blank" rel="noopener">Book a working session <span class="arr">&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+
+    <details class="roi-basis reveal">
+      <summary>Basis of preparation &mdash; read this before you use the number</summary>
+      <div class="roi-basis-bd" id="roi-basis"></div>
+    </details>
+
+    <p class="roi-disc">These are estimates built from the inputs above, not a quotation. Actual results vary by site, camera coverage, incident profile and deployment. Growth and retention lines are probabilistic and are shown after a 50% confidence discount; monitoring savings are contractual and are shown at full value. Every figure on this page is already net of what you pay SentriOS.</p>
   </div>
 </section>
 

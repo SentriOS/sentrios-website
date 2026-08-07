@@ -44,47 +44,377 @@
     });
   }
 
-  // ROI calculator (construction.html #roi)
-  if(document.getElementById('roi-cams')){
-    var rq=function(id){return document.getElementById(id);};
-    var usd=function(n){return '$'+Math.round(n).toLocaleString('en-US');};
-    var rIds=['roi-cams','roi-trad','roi-inc','roi-hrs'];
-    var SENT_MON=80, AVG_LOSS=10000, DOWN_WEEKS=1, DOWN_COST=8000, MISS_RATE=0.03, LABOR=65, RH_SENT=0.25;
-    var rNum=function(id){return parseFloat(rq(id).value)||0;};
-    var rFill=function(el){ if(!el)return; var mn=+el.min, mx=+el.max, v=+el.value;
-      el.style.setProperty('--pct',((v-mn)/(mx-mn)*100)+'%'); };
-    var rCalc=function(){
-      var cams=rNum('roi-cams'), tradMon=rNum('roi-trad');
-      var inc=rNum('roi-inc'), rh=rNum('roi-hrs');
+  /* ===================================================================
+     ROI calculator — construction.html #roi
+     Two models: trailer fleet (channel economics) and job sites (owner).
+     SentriOS pricing and the SentriOS-side churn figure are intentionally
+     NOT rendered anywhere. Every displayed figure is already net of them.
+     =================================================================== */
+  if(document.getElementById('roi-inputs')){
+  (function(){
+    "use strict";
 
-      rq('roi-v-cams').textContent=cams.toLocaleString();
-      rq('roi-v-trad').textContent=usd(tradMon);
-      rq('roi-v-inc').textContent=inc.toLocaleString();
-      rq('roi-v-hrs').textContent=rh;
-      rIds.forEach(function(id){rFill(rq(id));});
+    /* --- constants that never reach the page --- */
+    var PRICE       = 100;   // $ per stream per month, all features included
+    var SENT_CHURN  = 5;     // % annual churn with SentriOS
+    var SENT_DEP_HR = 0.25;  // technician hours to deploy one trailer
+    var SENT_MISS   = 2;     // % of events SentriOS misses
+    var GROWTH_DISC = 0.5;   // confidence haircut on growth + retention
 
-      var w1=cams*tradMon*12, c1=cams*SENT_MON*12, s1=w1-c1;
-      var perInc=AVG_LOSS+DOWN_WEEKS*DOWN_COST, w2=inc*perInc, c2=w2*MISS_RATE, s2=w2-c2;
-      var w4=inc*rh*LABOR, c4=inc*RH_SENT*LABOR, s4=w4-c4, hoursSaved=inc*Math.max(0,rh-RH_SENT);
-      var totalW=w1+w2+w4, totalC=c1+c2+c4, totalS=totalW-totalC;
-      var invest=c1, ret=invest>0?totalS/invest:0, perCam=cams>0?totalS/cams:0;
+    var mode = "fleet", preset = "cons";
 
-      rq('roi-total').textContent=usd(totalS);
-      rq('roi-percam').textContent=usd(perCam);
-      rq('roi-return').textContent=(ret>=10?Math.round(ret):ret.toFixed(1))+'×';
-      rq('roi-spend').textContent=usd(c1);
-      rq('roi-without').textContent=usd(totalW);
-      rq('roi-with').textContent=usd(totalC);
-
-      var mxW=Math.max(totalW,1);
-      rq('roi-bar-without').style.width='100%';
-      rq('roi-bar-with').style.width=Math.max(3,(totalC/mxW)*100)+'%';
-
-      rq('roi-k1-without').textContent=usd(w1); rq('roi-k1-with').textContent=usd(c1); rq('roi-k1-save').textContent=usd(s1);
-      rq('roi-k2-without').textContent=usd(w2); rq('roi-k2-with').textContent=usd(c2); rq('roi-k2-save').textContent=usd(s2);
-      rq('roi-k4-save').textContent=usd(s4); rq('roi-k4-hours').textContent=Math.round(hoursSaved).toLocaleString();
+    var P = {
+      fleet:{
+        cons:{trailers:200,monPct:70,cams:3,rate:120,rev:1000,depNow:2,tech:85,months:9,churnNow:15,extra1:0,extra2:0},
+        exp: {trailers:200,monPct:80,cams:4,rate:150,rev:1200,depNow:3,tech:85,months:10,churnNow:22,extra1:4,extra2:3},
+        agg: {trailers:200,monPct:90,cams:5,rate:250,rev:1500,depNow:4,tech:95,months:11,churnNow:30,extra1:8,extra2:6}
+      },
+      site:{
+        cons:{sites:12,cams:6,rate:120,inc:0.5,loss:7500,down:5000,missNow:15,adminH:6,adminR:65,months:9},
+        exp: {sites:12,cams:6,rate:150,inc:0.8,loss:10000,down:8000,missNow:25,adminH:6,adminR:65,months:10},
+        agg: {sites:12,cams:8,rate:250,inc:1.5,loss:15000,down:12000,missNow:35,adminH:8,adminR:75,months:11}
+      }
     };
-    rIds.forEach(function(id){var el=rq(id); if(el) el.addEventListener('input',rCalc);});
-    rCalc();
+    var S = {fleet:copy(P.fleet.cons), site:copy(P.site.cons)};
+
+    var F = {
+      fleet:[
+        {g:"Your fleet"},
+        {k:"trailers",l:"Trailers in your fleet",h:"Total units you own or manage",min:10,max:2000,step:10},
+        {k:"monPct",  l:"Share on monitored contracts",h:"Units where a customer pays for monitoring, %",min:10,max:100,step:5},
+        {k:"cams",    l:"Cameras or streams per trailer",h:"",min:1,max:5,step:1},
+        {g:"Your economics today"},
+        {k:"rate",  l:"What monitoring costs you per stream",h:"$ per stream per month, paid to your monitoring provider",min:40,max:250,step:5},
+        {k:"rev",   l:"What you charge per trailer",h:"$ per trailer per month, rental plus monitoring",min:400,max:3000,step:50},
+        {k:"depNow",l:"Hours to deploy your current monitoring solution",h:"Technician time per trailer, as it works today",min:0.5,max:4,step:0.5},
+        {k:"tech",  l:"Your loaded technician rate",h:"$ per hour",min:40,max:180,step:5},
+        {g:"What changes with SentriOS"},
+        {k:"months",  l:"Months live in year one",h:"Allow for phased rollout; go-live is 2–4 weeks per unit",min:1,max:12,step:1},
+        {k:"churnNow",l:"Your annual churn on monitored contracts",h:"% of monitored units you lose in a year today",min:10,max:40,step:1},
+        {k:"extra1",  l:"Extra trailers you win — response and recall",h:"Per year, on 13-second dispatch and a 20–25% improvement in recall. Leave at 0 to exclude.",min:0,max:60,step:1},
+        {k:"extra2",  l:"Extra trailers you win — custom agents",h:"Per year, on use cases your customer defines in plain language, live from day one. Leave at 0 to exclude.",min:0,max:60,step:1}
+      ],
+      site:[
+        {g:"Your sites"},
+        {k:"sites",l:"Active job sites",h:"Sites running at any one time",min:1,max:300,step:1},
+        {k:"cams", l:"Cameras per site",h:"",min:2,max:40,step:1},
+        {g:"What you spend today"},
+        {k:"rate",l:"What monitoring costs you per stream",h:"$ per stream per month. Enter 0 if you have no monitoring today.",min:0,max:250,step:5},
+        {g:"What happens when something goes wrong"},
+        {k:"inc", l:"Theft or loss events per site",h:"Per site per year, attempted or successful",min:0,max:6,step:0.1},
+        {k:"loss",l:"Average material loss per event",h:"$ — tools, copper, fuel, equipment",min:0,max:60000,step:500},
+        {k:"down",l:"Average downtime cost per event",h:"$ — standby, resequencing, replacement lead time",min:0,max:60000,step:500},
+        {g:"How much gets stopped"},
+        {k:"missNow",l:"Events your setup misses today",h:"% — what an operator queue does not intercept in time",min:10,max:35,step:5},
+        {g:"Reporting and rollout"},
+        {k:"adminH",l:"Admin hours per incident report",h:"PM and admin time to compile today",min:0,max:24,step:0.5},
+        {k:"adminR",l:"Loaded admin rate",h:"$ per hour",min:30,max:180,step:5},
+        {k:"months",l:"Months live in year one",h:"Go-live is 2–4 weeks per site",min:1,max:12,step:1}
+      ]
+    };
+
+    var LOCKS = {
+      fleet:[
+        {l:"SentriOS, all features included",r:"One flat rate per stream",h:"No setup fee, no new hardware, no tiers"},
+        {l:"Detection to 911 dispatch",r:"13 sec",h:"Against a 20–30 minute operator queue"},
+        {l:"Recall vs a fixed classifier",r:"+20–25%",h:"Fewer events missed on the same cameras"}
+      ],
+      site:[
+        {l:"SentriOS, all features included",r:"One flat rate per stream",h:"No setup fee, no new hardware, no tiers"},
+        {l:"Events SentriOS misses",r:"2%",h:"Measured under 3% across live job sites; modelled at 2%"},
+        {l:"Detection to 911 dispatch",r:"13 sec",h:"Against a 20–30 minute operator queue"}
+      ]
+    };
+
+    /* --- helpers --- */
+    function copy(o){var r={},k; for(k in o){if(Object.prototype.hasOwnProperty.call(o,k)) r[k]=o[k];} return r;}
+    function $(id){return document.getElementById(id);}
+    function money(n){var neg=n<0; n=Math.round(Math.abs(n)); return (neg?"−$":"$")+n.toLocaleString("en-US");}
+    function num(n,d){return Number(n).toFixed(d||0);}
+    function pct(n){return num(n,0)+"%";}
+    function fill(el){ if(!el) return; var mn=+el.min, mx=+el.max, v=+el.value;
+      el.style.setProperty("--pct", (mx>mn ? (v-mn)/(mx-mn)*100 : 0)+"%"); }
+
+    /* --- models --- */
+    function calcFleet(s){
+      var monitored = Math.round(s.trailers * s.monPct/100);
+      var cams      = monitored * s.cams;
+
+      // hard cash: the monitoring line inside your cost of goods
+      var cogsCut      = cams * (s.rate - PRICE) * 12;
+      var perTrailerMo = s.cams * (s.rate - PRICE);
+      var cBefore = s.rev - s.cams*s.rate;
+      var cAfter  = s.rev - s.cams*PRICE;
+      var mBefore = s.rev>0 ? cBefore/s.rev*100 : 0;
+      var mAfter  = s.rev>0 ? cAfter /s.rev*100 : 0;
+
+      // technician time released on cut-over (year one only)
+      var hrsSaved   = Math.max(0, s.depNow - SENT_DEP_HR);
+      var deploySave = monitored * hrsSaved * s.tech;
+
+      // growth + retention, risk adjusted
+      var unit      = cAfter * 12;
+      var extra1Adj = s.extra1 * unit * GROWTH_DISC;
+      var extra2Adj = s.extra2 * unit * GROWTH_DISC;
+      var retained  = monitored * Math.max(0, s.churnNow - SENT_CHURN)/100;
+      var churnAdj  = retained * unit * GROWTH_DISC;
+      var growth    = extra1Adj + extra2Adj + churnAdj;
+
+      var steady = cogsCut + growth;
+      var y1     = steady*(s.months/12) + deploySave;
+
+      return {monitored:monitored,cams:cams,cogsCut:cogsCut,perTrailerMo:perTrailerMo,
+        cBefore:cBefore,cAfter:cAfter,mBefore:mBefore,mAfter:mAfter,
+        hrsSaved:hrsSaved,deploySave:deploySave,extra1Adj:extra1Adj,extra2Adj:extra2Adj,
+        retained:retained,churnAdj:churnAdj,growth:growth,steady:steady,y1:y1,
+        unitsGained:retained + s.extra1 + s.extra2};
+    }
+
+    function calcSite(s){
+      var cams = s.sites * s.cams;
+      var cash = cams * (s.rate - PRICE) * 12;
+      var spend = cams * PRICE * 12;
+
+      var incidents   = s.sites * s.inc;
+      var exposure    = s.loss + s.down;
+      var intercepted = incidents * (s.missNow - SENT_MISS)/100;
+      var lossVal     = Math.max(0, intercepted) * exposure;
+      var adminVal    = incidents * s.adminH * s.adminR * 0.9;
+
+      var net  = cash + lossVal + adminVal;
+      var ret  = spend>0 ? (cams*s.rate*12 + lossVal + adminVal)/spend : 0;
+      return {cams:cams,cash:cash,incidents:incidents,exposure:exposure,
+        intercepted:Math.max(0,intercepted),lossVal:lossVal,adminVal:adminVal,
+        net:net,ret:ret,y1:net*(s.months/12),perCam:cams>0?net/cams:0};
+    }
+
+    /* --- inputs --- */
+    function renderInputs(){
+      var box=$("roi-inputs"); box.innerHTML="";
+      F[mode].forEach(function(f){
+        if(f.g){var g=document.createElement("div"); g.className="roi-grp"; g.textContent=f.g; box.appendChild(g); return;}
+        var wrap=document.createElement("div"); wrap.className="roi-field";
+        var id="roi-in-"+f.k, dec=(f.step<1)?1:0;
+        wrap.innerHTML =
+          '<div class="roi-field-top"><label for="'+id+'">'+f.l+
+          (f.h?'<span class="hint">'+f.h+'</span>':'')+'</label>'+
+          '<input type="number" id="'+id+'" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'"></div>'+
+          '<input type="range" id="roi-rg-'+f.k+'" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" aria-labelledby="'+id+'">';
+        box.appendChild(wrap);
+        var n=$(id), r=$("roi-rg-"+f.k);
+        n.value=num(S[mode][f.k],dec); r.value=S[mode][f.k]; fill(r);
+        function set(v){
+          v=parseFloat(v); if(isNaN(v)) v=f.min;
+          v=Math.min(f.max,Math.max(f.min,v));
+          S[mode][f.k]=v; n.value=num(v,dec); r.value=v; fill(r); render();
+        }
+        r.addEventListener("input",function(){set(r.value);});
+        n.addEventListener("input",function(){
+          var v=parseFloat(n.value); if(isNaN(v))return;
+          S[mode][f.k]=Math.min(f.max,Math.max(f.min,v)); r.value=S[mode][f.k]; fill(r); render();
+        });
+        n.addEventListener("blur",function(){set(n.value);});
+      });
+      $("roi-locks").innerHTML = LOCKS[mode].map(function(x){
+        return '<div class="roi-lock"><span class="l">'+x.l+(x.h?'<span class="hint">'+x.h+'</span>':'')+
+               '</span><span class="r">'+x.r+'</span></div>';
+      }).join("");
+    }
+
+    function row(t,m,v,cls,extra){
+      return '<div class="roi-line'+(extra||'')+'"><div class="l"><div class="t">'+t+'</div>'+
+             (m?'<div class="m">'+m+'</div>':'')+'</div><div class="v '+(cls||'')+'">'+v+'</div></div>';
+    }
+    function sign(n){return n>=0?"pos":"neg";}
+
+    /* --- render --- */
+    function render(){
+      var s=S[mode], L=$("roi-ledger");
+      if(mode==="fleet"){
+        var r=calcFleet(s);
+        $("roi-dek").textContent="You already own the trailers, the cameras and the customer. The question that matters is what an agent does to the monitoring line in your cost of goods — and to the contracts you keep and win.";
+        $("roi-ledger-title").textContent="Your gross profit, before and after";
+        $("roi-ledger-note").textContent=r.monitored.toLocaleString()+" monitored trailers · "+r.cams.toLocaleString()+" streams";
+        $("roi-hero-lbl").textContent="Annual gross profit lift, steady state";
+        $("roi-hero-val").textContent=money(r.steady);
+        $("roi-hero-val").className="big "+sign(r.steady);
+        $("roi-hero-sub").innerHTML="Year one including cut-over <b>"+money(r.y1)+
+          "</b> · per trailer per month <b>"+money(r.perTrailerMo)+"</b>";
+
+        L.innerHTML =
+          row("Monitoring line in your cost of goods",
+              r.cams.toLocaleString()+" streams × 12 months, net of SentriOS",
+              money(r.cogsCut), sign(r.cogsCut), "  roi-sub-total") +
+          (s.extra1>0 ? row("Contracts won on response and recall",
+              s.extra1+" trailers × "+money(r.cAfter)+" contribution × 12, discounted 50%",
+              money(r.extra1Adj),"pos") : "") +
+          (s.extra2>0 ? row("Contracts won on customer-defined agents",
+              s.extra2+" trailers × "+money(r.cAfter)+" contribution × 12, discounted 50%",
+              money(r.extra2Adj),"pos") : "") +
+          row("Contracts you stop losing",
+              num(r.retained,1)+" trailers retained from "+pct(s.churnNow)+" churn × "+money(r.cAfter)+" × 12, discounted 50%",
+              money(r.churnAdj),"pos") +
+          ((s.extra1>0||s.extra2>0) ? row("Growth and retention, risk-adjusted",
+              "every line above carries a 50% confidence discount",
+              money(r.growth),"pos","  roi-sub-total") : "") +
+          row("Technician time released at cut-over",
+              r.monitored.toLocaleString()+" trailers × "+num(r.hrsSaved,2)+" hrs saved × $"+num(s.tech)+" — year one only",
+              money(r.deploySave),"pos") +
+          row("Steady-state annual lift","full twelve months, rollout complete",money(r.steady),sign(r.steady),"  roi-total");
+
+        $("roi-strip").innerHTML =
+          '<div><div class="k">Contribution margin<br>per trailer</div><div class="n">'+pct(r.mBefore)+' → '+pct(r.mAfter)+'</div></div>'+
+          '<div><div class="k">Trailers kept or won<br>per year</div><div class="n">'+num(r.unitsGained,1)+'</div></div>'+
+          '<div><div class="k">Three-year<br>cumulative lift</div><div class="n">'+money(r.y1+r.steady*2)+'</div></div>';
+      } else {
+        var q=calcSite(s);
+        $("roi-dek").textContent="Two kinds of money are in play here, and they are not worth the same. One is an invoice you cancel. The other is a loss you avoid. This keeps them apart.";
+        $("roi-ledger-title").textContent="Cash first, then risk";
+        $("roi-ledger-note").textContent=s.sites+" sites · "+q.cams.toLocaleString()+" streams";
+        $("roi-hero-lbl").textContent="Net annual benefit, after paying SentriOS";
+        $("roi-hero-val").textContent=money(q.net);
+        $("roi-hero-val").className="big "+sign(q.net);
+        $("roi-hero-sub").innerHTML="Of which bankable cash <b>"+money(q.cash)+
+          "</b> · year one <b>"+money(q.y1)+"</b>";
+
+        L.innerHTML =
+          row("Monitoring cash, net",
+              q.cams.toLocaleString()+" streams × 12 months at $"+num(s.rate)+", net of SentriOS",
+              money(q.cash), sign(q.cash), "  roi-sub-total") +
+          row("Losses intercepted",
+              num(q.intercepted,1)+" more events stopped × "+money(q.exposure)+" exposure — "+pct(s.missNow)+" missed today vs 2% with SentriOS",
+              money(q.lossVal),"pos") +
+          row("Reporting time recovered",
+              num(q.incidents,1)+" events × "+num(s.adminH,1)+" hrs × $"+num(s.adminR)+", credited at a 90% reduction",
+              money(q.adminVal),"pos") +
+          row("Net annual benefit","cash plus avoided loss, after SentriOS",money(q.net),sign(q.net),"  roi-total");
+
+        $("roi-strip").innerHTML =
+          '<div><div class="k">Return on every<br>dollar of spend</div><div class="n">'+num(q.ret,2)+'×</div></div>'+
+          '<div><div class="k">Net benefit per<br>stream per year</div><div class="n">'+money(q.perCam)+'</div></div>'+
+          '<div><div class="k">Extra events<br>stopped per year</div><div class="n">'+num(q.intercepted,1)+'</div></div>';
+      }
+      renderBasis();
+    }
+
+    function renderBasis(){
+      var common =
+        '<h4>What is fixed</h4><ul>'+
+        '<li>SentriOS is one flat rate per stream with every agent feature included — verification, voice-down deterrence, RapidSOS dispatch, two-way SMS, and incident documentation into Procore. No setup fee, no hardware, no tiers. <b>Every figure on this page is already net of that rate</b>, so nothing below needs to be adjusted for it.</li>'+
+        '<li>Every other number on this page is yours to change. Nothing else is hard-coded into the result.</li>'+
+        '<li>Incident response improves from a 20–30 minute operator queue to 13 seconds. That is stated as a capability, not converted into a dollar figure, because doing so would require an interdiction-probability assumption we have not measured.</li>'+
+        '</ul>';
+
+      var fleetB =
+        '<h4>How the fleet model works</h4><ul>'+
+        '<li>Monitoring is treated as your cost of goods, not your customer’s. The saving is the difference between what you pay per stream today and what you pay SentriOS, across monitored units only.</li>'+
+        '<li>Contribution margin compares your rental revenue per trailer against the monitoring cost inside it. Other costs — the trailer, transport, power, service — are unchanged by SentriOS and are left out of both sides.</li>'+
+        '<li><b>Technician time is a saving, not a cost.</b> SentriOS is a software overlay on cameras you already run, so a cut-over takes roughly fifteen minutes a trailer against the hours your current solution needs. It is credited once, in year one. If your trailers redeploy between sites during the year, this recurs and the model does not credit it.</li>'+
+        '<li>Retention is credited only on the gap between the churn you enter and the churn we see on monitored SentriOS units — and then halved. Contracts won on response, recall and customer-defined agents default to zero; if you cannot name the bids, leave them there.</li>'+
+        '<li>Three-year cumulative is year one plus two steady-state years. No price escalation, no fleet growth, no discounting applied.</li>'+
+        '</ul>';
+
+      var siteB =
+        '<h4>How the job-site model works</h4><ul>'+
+        '<li><b>The comparison is miss rate against miss rate.</b> Your current setup intercepts most events; the model credits SentriOS only with the difference between what you miss today and the 2% SentriOS misses.</li>'+
+        '<li>Events are entered <b>per site per year</b> and multiplied by site count, so the answer scales the way a portfolio actually does.</li>'+
+        '<li>Cash savings and avoided losses are never added together without a label. The first line is an invoice you cancel. Everything below it is an expected value — real over a portfolio and a year, lumpy on any single site.</li>'+
+        '<li>Reporting time is credited at a 90% reduction, not 100% — someone still reviews the report.</li>'+
+        '<li>Year one is scaled by months live to reflect phased go-live.</li>'+
+        '</ul>';
+
+      var src =
+        '<h4>Where the default assumptions come from</h4><ul>'+
+        '<li>Traditional monitoring at $120–$250 per stream per month sits inside the $200–$400 range quoted across the remote-monitoring market; the conservative default deliberately uses the bottom of it, which understates the saving.</li>'+
+        '<li>Construction equipment theft loss estimates draw on National Equipment Register and NICB reporting, with recovery rates below 25%. Downtime cost per event is a planning figure and should be replaced with your own standby and resequencing rates.</li>'+
+        '<li>Alert accuracy at or above 95%, false positives under 5%, and misses under 3% are SentriOS production figures across 100+ live job sites. The model uses 2%.</li>'+
+        '<li>Go-live of two to four weeks on existing cameras and VMS is a SentriOS deployment standard, not a modelled assumption.</li>'+
+        '</ul>'+
+        '<h4>What this is not</h4><ul>'+
+        '<li>Not a quotation, and not a guarantee. Bring your camera and VMS inventory to a working session and these inputs get replaced with your actual numbers.</li>'+
+        '<li>Not an insurance calculation. Premium and deductible effects are excluded entirely, and for most portfolios they are additive to the figures shown.</li>'+
+        '</ul>';
+
+      $("roi-basis").innerHTML = common + (mode==="fleet"?fleetB:siteB) + src;
+    }
+
+    /* --- copy summary --- */
+    function summary(){
+      var s=S[mode], out=[];
+      if(mode==="fleet"){
+        var r=calcFleet(s);
+        out.push("SENTRIOS ROI — TRAILER FLEET");
+        out.push("Fleet: "+s.trailers+" trailers, "+pct(s.monPct)+" monitored ("+r.monitored+" units), "+s.cams+" streams each");
+        out.push("Monitoring today: $"+num(s.rate)+"/stream/mo. All figures below are net of SentriOS.");
+        out.push("");
+        out.push("Cost of goods reduction:          "+money(r.cogsCut));
+        if(s.extra1>0) out.push("Won on response and recall (50%): "+money(r.extra1Adj));
+        if(s.extra2>0) out.push("Won on custom agents (50%):       "+money(r.extra2Adj));
+        out.push("Contracts retained (50%):         "+money(r.churnAdj));
+        out.push("Technician time at cut-over:      "+money(r.deploySave)+"  (year one only)");
+        out.push("");
+        out.push("STEADY-STATE ANNUAL LIFT:         "+money(r.steady));
+        out.push("YEAR ONE:                         "+money(r.y1));
+        out.push("Contribution margin per trailer:  "+pct(r.mBefore)+" -> "+pct(r.mAfter));
+        out.push("Trailers kept or won per year:    "+num(r.unitsGained,1));
+      } else {
+        var q=calcSite(s);
+        out.push("SENTRIOS ROI — JOB SITES");
+        out.push("Portfolio: "+s.sites+" active sites, "+s.cams+" cameras each ("+q.cams+" streams)");
+        out.push("Monitoring today: $"+num(s.rate)+"/stream/mo. All figures below are net of SentriOS.");
+        out.push("Events: "+num(s.inc,1)+"/site/yr, "+money(q.exposure)+" exposure each");
+        out.push("Miss rate today "+pct(s.missNow)+" vs 2% with SentriOS");
+        out.push("");
+        out.push("Monitoring cash, net:             "+money(q.cash));
+        out.push("Losses intercepted:               "+money(q.lossVal));
+        out.push("Reporting time recovered:         "+money(q.adminVal));
+        out.push("");
+        out.push("NET ANNUAL BENEFIT:               "+money(q.net));
+        out.push("Year one:                         "+money(q.y1));
+        out.push("Return per dollar of spend:       "+num(q.ret,2)+"x");
+        out.push("Extra events stopped per year:    "+num(q.intercepted,1));
+      }
+      out.push("");
+      out.push("Assumption set: "+({cons:"Conservative",exp:"Expected",agg:"Aggressive"}[preset]));
+      out.push("Estimates only, based on the inputs above. Not a quotation.");
+      return out.join("\n");
+    }
+
+    $("roi-copy").addEventListener("click",function(){
+      var t=summary(), b=this;
+      function done(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy summary";},1600);}
+      function fallback(){
+        var ta=document.createElement("textarea"); ta.value=t;
+        ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+        ta.select(); try{document.execCommand("copy");done();}catch(e){b.textContent="Press Ctrl+C";}
+        document.body.removeChild(ta);
+      }
+      if(navigator.clipboard && window.isSecureContext){navigator.clipboard.writeText(t).then(done,fallback);}
+      else fallback();
+    });
+
+    /* --- mode + preset --- */
+    function setMode(m){
+      mode=m;
+      $("roi-m-fleet").setAttribute("aria-pressed", m==="fleet");
+      $("roi-m-site").setAttribute("aria-pressed", m==="site");
+      renderInputs(); render();
+    }
+    $("roi-m-fleet").addEventListener("click",function(){setMode("fleet");});
+    $("roi-m-site").addEventListener("click",function(){setMode("site");});
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-roi-p]"),function(b){
+      b.addEventListener("click",function(){
+        preset=b.getAttribute("data-roi-p");
+        Array.prototype.forEach.call(document.querySelectorAll("[data-roi-p]"),function(x){
+          x.setAttribute("aria-pressed", x===b);
+        });
+        S.fleet=copy(P.fleet[preset]); S.site=copy(P.site[preset]);
+        renderInputs(); render();
+      });
+    });
+
+    setMode("fleet");
+  })();
   }
 })();
