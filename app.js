@@ -59,7 +59,8 @@
     var SENT_CHURN  = 5;     // % annual churn with SentriOS
     var SENT_DEP_HR = 0.25;  // technician hours to deploy one trailer
     var SENT_MISS   = 2;     // % of events SentriOS misses
-    var GROWTH_DISC = 0.5;   // confidence haircut on growth + retention
+    var GROWTH_DISC = 0.5;   // confidence haircut on growth + retention (fleet)
+    var LOSS_DISC   = 0.4;   // haircut on job-site avoided loss + reporting time
 
     var mode = "fleet", preset = "cons";
 
@@ -102,7 +103,7 @@
       site:[
         {g:"Your sites"},
         {k:"sites",l:"Active job sites",h:"Sites running at any one time",min:1,max:300,step:1},
-        {k:"cams", l:"Cameras per site",h:"",min:2,max:40,step:1},
+        {k:"cams", l:"Cameras per site",h:"Large projects and data-centre builds run into the hundreds",min:2,max:400,step:1},
         {g:"What you spend today"},
         {k:"rate",l:"What monitoring costs you per stream",h:"$ per stream per month paid to your provider, from $100. Enter 0 if you have no monitoring today — the model then assumes nothing is intercepted and 3 theft events per site per year.",min:0,max:250,step:5,vals:SITE_RATES},
         {g:"What happens when something goes wrong"},
@@ -126,7 +127,7 @@
       ],
       site:[
         {l:"SentriOS, all features included",r:"One flat rate per stream",h:"No setup fee, no new hardware, no tiers"},
-        {l:"Events SentriOS misses",r:"2%",h:"Measured under 3% across live job sites; modelled at 2%"},
+        {l:"Events SentriOS misses",r:"2%",h:"A planning assumption, not a published benchmark. See the basis below."},
         {l:"Detection to 911 dispatch",r:"13 sec",h:"Against a 20–30 minute operator queue"}
       ]
     };
@@ -182,18 +183,23 @@
       var cash = cams * (s.rate - PRICE) * 12;
       var spend = cams * PRICE * 12;
 
+      var banded      = s.cams > 100;
       var noMon       = s.rate === 0;
       var missEff     = noMon ? NO_MON_MISS : s.missNow;
       var incidents   = s.sites * s.inc;
       var exposure    = s.loss + s.down;
       var intercepted = incidents * (missEff - SENT_MISS)/100;
-      var lossVal     = Math.max(0, intercepted) * exposure;
-      var adminVal    = incidents * s.adminH * s.adminR * 0.9;
+      var lossGross   = Math.max(0, intercepted) * exposure;
+      var adminGross  = incidents * s.adminH * s.adminR * 0.9;
+      var keep        = 1 - LOSS_DISC;
+      var lossVal     = lossGross * keep;
+      var adminVal    = adminGross * keep;
 
       var net  = cash + lossVal + adminVal;
       var ret  = spend>0 ? (cams*s.rate*12 + lossVal + adminVal)/spend : 0;
       return {cams:cams,cash:cash,incidents:incidents,exposure:exposure,noMon:noMon,missEff:missEff,
-        intercepted:Math.max(0,intercepted),lossVal:lossVal,adminVal:adminVal,
+        banded:banded,intercepted:Math.max(0,intercepted),lossGross:lossGross,lossVal:lossVal,
+        adminGross:adminGross,adminVal:adminVal,
         net:net,ret:ret,y1:net*(s.months/12),perCam:cams>0?net/cams:0};
     }
 
@@ -272,6 +278,19 @@
              (m?'<div class="m">'+m+'</div>':'')+'</div><div class="v '+(cls||'')+'">'+v+'</div></div>';
     }
     function sign(n){return n>=0?"pos":"neg";}
+    function flag(html){return '<div class="roi-flag">'+html+'</div>';}
+
+    var DISC = {
+      fleet:"These are estimates built from the inputs above, not a quotation. Actual results vary by fleet, "+
+            "contract mix and deployment. In this model the monitoring line and the technician time are "+
+            "contractual and shown at full value; the three growth and retention lines are probabilistic and "+
+            "each carries a stated 50% confidence discount before it reaches any total. Every line is already "+
+            "net of what you pay SentriOS.",
+      site: "These are estimates built from the inputs above, not a quotation. Actual results vary by site, "+
+            "camera coverage, incident profile and deployment. In this model the cash line is a cancelled "+
+            "invoice — contractual, shown at full value. Everything below it is probabilistic and carries a "+
+            "fixed 40% discount before it reaches the total. Every line is already net of what you pay SentriOS."
+    };
 
     /* --- render --- */
     function render(){
@@ -287,18 +306,26 @@
         $("roi-hero-sub").innerHTML="Year one including cut-over <b>"+money(r.y1)+
           "</b> · per trailer per month <b>"+money(r.perTrailerMo)+"</b>";
 
-        L.innerHTML =
+        var warn = (s.rate < PRICE) ? flag("<b>At this rate you already pay less per stream than SentriOS "+
+          "costs.</b> On price alone this is an increase, not a saving — the monitoring line below is negative "+
+          "and says so. What you would be buying is autonomous resolution and 13-second dispatch in place of an "+
+          "alert queue, which is a conversation about capability rather than cost.") : "";
+
+        L.innerHTML = warn +
           row("Monitoring line in your cost of goods",
               r.cams.toLocaleString()+" streams × 12 months, net of SentriOS",
               money(r.cogsCut), sign(r.cogsCut), "  roi-sub-total") +
           (s.extra1>0 ? row("Contracts won on response and recall",
-              s.extra1+" trailers × "+money(r.cAfter)+" contribution × 12, discounted 50%",
+              s.extra1+" trailers × "+money(r.cAfter)+" contribution × 12 = "+money(s.extra1*r.cAfter*12)+
+              ", less a 50% confidence discount — probabilistic, not contractual",
               money(r.extra1Adj),"pos") : "") +
           (s.extra2>0 ? row("Contracts won on customer-defined agents",
-              s.extra2+" trailers × "+money(r.cAfter)+" contribution × 12, discounted 50%",
+              s.extra2+" trailers × "+money(r.cAfter)+" contribution × 12 = "+money(s.extra2*r.cAfter*12)+
+              ", less a 50% confidence discount — probabilistic",
               money(r.extra2Adj),"pos") : "") +
           row("Contracts you stop losing",
-              num(r.retained,1)+" trailers retained from "+pct(s.churnNow)+" churn × "+money(r.cAfter)+" × 12, discounted 50%",
+              num(r.retained,1)+" trailers retained from "+pct(s.churnNow)+" churn × "+money(r.cAfter)+
+              " × 12 = "+money(r.retained*r.cAfter*12)+", less a 50% confidence discount — probabilistic",
               money(r.churnAdj),"pos") +
           ((s.extra1>0||s.extra2>0) ? row("Growth and retention, risk-adjusted",
               "every line above carries a 50% confidence discount",
@@ -323,17 +350,38 @@
         $("roi-hero-sub").innerHTML="Of which bankable cash <b>"+money(q.cash)+
           "</b> · year one <b>"+money(q.y1)+"</b>";
 
-        L.innerHTML =
+        var notes = "";
+        if(q.banded){
+          notes += flag("<b>At "+s.cams+" cameras on a site you are above the per-camera band.</b> Projects at "+
+            "this density are priced as a monthly site fee with a camera allowance, so adding cameras inside the "+
+            "band costs nothing extra. The arithmetic below still describes the economics; the invoice is "+
+            "structured differently. Bring the camera count to a working session and we will price the band.");
+        }
+        if(q.incidents<=0){
+          notes += flag("<b>You have entered zero theft or loss events.</b> The model therefore credits zero loss "+
+            "avoidance and zero reporting time — correctly. Only the cash line moves, and that line does not depend "+
+            "on any estimate at all.");
+        } else if(q.missEff<=2){
+          notes += flag("<b>Your current setup is set to miss no more than SentriOS does.</b> The model therefore "+
+            "credits zero loss avoidance — correctly. Everything below the cash line stays at zero until there is "+
+            "a gap to close.");
+        }
+
+        L.innerHTML = notes +
           row("Monitoring cash, net",
               q.cams.toLocaleString()+" streams × 12 months at $"+num(s.rate)+", net of SentriOS",
               money(q.cash), sign(q.cash), "  roi-sub-total") +
-          row("Losses intercepted",
-              q.noMon
-                ? num(q.intercepted,1)+" events stopped × "+money(q.exposure)+" exposure — with no monitoring you intercept nothing today, against 2% missed with SentriOS"
-                : num(q.intercepted,1)+" more events stopped × "+money(q.exposure)+" exposure — "+pct(q.missEff)+" missed today vs 2% with SentriOS",
+          row("Losses intercepted, risk-adjusted",
+              (q.noMon
+                ? "you intercept nothing today with no monitoring, against 2% missed with SentriOS — a gap of "
+                : "miss rate "+pct(q.missEff)+" today vs 2% with SentriOS — a gap of ")+
+              num(q.intercepted,1)+" events × "+money(q.exposure)+" exposure = "+money(q.lossGross)+
+              ", less a "+pct(LOSS_DISC*100)+" discount — probabilistic, not contractual",
               money(q.lossVal),"pos") +
-          row("Reporting time recovered",
-              num(q.incidents,1)+" events × "+num(s.adminH,1)+" hrs × $"+num(s.adminR)+", credited at a 90% reduction",
+          row("Reporting time recovered, risk-adjusted",
+              num(q.incidents,1)+" events × "+num(s.adminH,1)+" hrs × $"+num(s.adminR)+
+              " = "+money(q.adminGross/0.9)+", credited at a 90% reduction, less a "+pct(LOSS_DISC*100)+
+              " discount — probabilistic",
               money(q.adminVal),"pos") +
           row("Net annual benefit","cash plus avoided loss, after SentriOS",money(q.net),sign(q.net),"  roi-total");
 
@@ -342,13 +390,15 @@
           '<div><div class="k">Net benefit per<br>stream per year</div><div class="n">'+money(q.perCam)+'</div></div>'+
           '<div><div class="k">Extra events<br>stopped per year</div><div class="n">'+num(q.intercepted,1)+'</div></div>';
       }
+      var dq=document.querySelector(".roi-disc"); if(dq) dq.textContent=DISC[mode];
       renderBasis();
     }
 
     function renderBasis(){
       var common =
         '<h4>What is fixed</h4><ul>'+
-        '<li>SentriOS is one flat rate per stream with every agent feature included — verification, voice-down deterrence, RapidSOS dispatch, two-way SMS, and incident documentation into Procore. No setup fee, no hardware, no tiers. <b>Every figure on this page is already net of that rate</b>, so nothing below needs to be adjusted for it.</li>'+
+        '<li>SentriOS is one flat rate per stream with every agent feature included — verification, voice-down deterrence, RapidSOS dispatch, two-way SMS, and incident documentation into Procore. No setup fee, no hardware, no tiers. It is an indicative planning rate for direct purchase, before any channel transfer discount, and it is not a quotation.</li>'+
+        '<li><b>Every line in this ledger is already net of what you pay SentriOS.</b> There is no gross-spend line with the cost subtracted underneath — the monitoring line is the net movement itself, and every line below it is money you keep. Nothing is netted off anywhere you cannot see it.</li>'+
         '<li>Every other number on this page is yours to change. Nothing else is hard-coded into the result.</li>'+
         '<li>Incident response improves from a 20–30 minute operator queue to 13 seconds. That is stated as a capability, not converted into a dollar figure, because doing so would require an interdiction-probability assumption we have not measured.</li>'+
         '</ul>';
@@ -367,7 +417,7 @@
         '<li><b>The comparison is miss rate against miss rate.</b> Your current setup intercepts most events; the model credits SentriOS only with the difference between what you miss today and the 2% SentriOS misses.</li>'+
         '<li><b>If you have no monitoring today, enter $0.</b> The miss rate is then forced to 100% — nothing is intercepted before it happens — and the event count is set to three per site per year, the figure unmonitored sites tend to run at. That event count stays yours to change; the miss rate does not.</li>'+
         '<li>Events are entered <b>per site per year</b> and multiplied by site count, so the answer scales the way a portfolio actually does.</li>'+
-        '<li>Cash savings and avoided losses are never added together without a label. The first line is an invoice you cancel. Everything below it is an expected value — real over a portfolio and a year, lumpy on any single site.</li>'+
+        '<li><b>Cash and avoidance are never added together without a label.</b> The first line is a cancelled invoice — contractual, shown at full value. Everything below it is probabilistic: real across a portfolio and a year, lumpy on any single site, and discounted by 40% before it reaches the total. That discount is fixed rather than a slider, so the figure in front of you is not one anybody can quietly tune.</li>'+
         '<li>Reporting time is credited at a 90% reduction, not 100% — someone still reviews the report.</li>'+
         '<li>Year one is scaled by months live to reflect phased go-live.</li>'+
         '</ul>';
@@ -376,8 +426,12 @@
         '<h4>Where the default assumptions come from</h4><ul>'+
         '<li>Traditional monitoring at $120–$250 per stream per month sits inside the $200–$400 range quoted across the remote-monitoring market; the conservative default deliberately uses the bottom of it, which understates the saving.</li>'+
         '<li>Construction equipment theft loss estimates draw on National Equipment Register and NICB reporting, with recovery rates below 25%. Downtime cost per event is a planning figure and should be replaced with your own standby and resequencing rates.</li>'+
-        '<li>Alert accuracy at or above 95%, false positives under 5%, and misses under 3% are SentriOS production figures across 100+ live job sites. The model uses 2%.</li>'+
         '<li>Go-live of two to four weeks on existing cameras and VMS is a SentriOS deployment standard, not a modelled assumption.</li>'+
+        '</ul>'+
+        '<h4>On the 2% miss rate, stated precisely</h4><ul>'+
+        '<li>SentriOS publishes alert accuracy at or above 95% and a false-positive rate under 5%. Both describe <b>precision</b> — how many of the alerts we raise turn out to be real. Neither describes <b>recall</b> — how many real events we catch. They are different measurements, and one cannot be derived from the other.</li>'+
+        '<li>The 2% used here is therefore <b>a planning assumption, not a published performance figure</b>. A validated recall benchmark, measured on a frozen stratified evaluation set, is in progress; when it exists it will replace this figure and the methodology will be published alongside it.</li>'+
+        '<li>If you want the conservative reading, ignore every loss-avoidance line and look at the cash line on its own. The cash line does not depend on this number at all.</li>'+
         '</ul>'+
         '<h4>What this is not</h4><ul>'+
         '<li>Not a quotation, and not a guarantee. Bring your camera and VMS inventory to a working session and these inputs get replaced with your actual numbers.</li>'+
@@ -396,10 +450,10 @@
         out.push("Fleet: "+s.trailers+" trailers, "+pct(s.monPct)+" monitored ("+r.monitored+" units), "+s.cams+" streams each");
         out.push("Monitoring today: $"+num(s.rate)+"/stream/mo. All figures below are net of SentriOS.");
         out.push("");
-        out.push("Cost of goods reduction:          "+money(r.cogsCut));
+        out.push("Cost of goods reduction:          "+money(r.cogsCut)+"   [contractual]");
         if(s.extra1>0) out.push("Won on response and recall (50%): "+money(r.extra1Adj));
         if(s.extra2>0) out.push("Won on custom agents (50%):       "+money(r.extra2Adj));
-        out.push("Contracts retained (50%):         "+money(r.churnAdj));
+        out.push("Contracts retained:               "+money(r.churnAdj)+"   [probabilistic, 50% discount]");
         out.push("Technician time at cut-over:      "+money(r.deploySave)+"  (year one only)");
         out.push("");
         out.push("STEADY-STATE ANNUAL LIFT:         "+money(r.steady));
@@ -416,9 +470,9 @@
           ? "No monitoring today: 100% missed, "+num(s.inc,1)+" events/site/yr assumed. SentriOS misses 2%."
           : "Miss rate today "+pct(q.missEff)+" vs 2% with SentriOS");
         out.push("");
-        out.push("Monitoring cash, net:             "+money(q.cash));
-        out.push("Losses intercepted:               "+money(q.lossVal));
-        out.push("Reporting time recovered:         "+money(q.adminVal));
+        out.push("Monitoring cash, net:             "+money(q.cash)+"   [contractual]");
+        out.push("Losses intercepted (risk-adj):    "+money(q.lossVal)+"   [probabilistic, 40% discount]");
+        out.push("Reporting time recovered:         "+money(q.adminVal)+"   [probabilistic, 40% discount]");
         out.push("");
         out.push("NET ANNUAL BENEFIT:               "+money(q.net));
         out.push("Year one:                         "+money(q.y1));
@@ -427,6 +481,9 @@
       }
       out.push("");
       out.push("Assumption set: "+({cons:"Conservative",exp:"Expected",agg:"Aggressive"}[preset]));
+      out.push("Every line above is already net of what you pay SentriOS.");
+      out.push("[contractual] lines are invoices you cancel. [probabilistic] lines carry a stated discount.");
+      out.push("The 2% SentriOS miss rate is a planning assumption, not a published benchmark.");
       out.push("Estimates only, based on the inputs above. Not a quotation.");
       return out.join("\n");
     }
@@ -444,10 +501,42 @@
       else fallback();
     });
 
+    /* --- send the summary, and (optionally) learn from the inputs ---
+       CAPTURE_ENDPOINT stays null until you stand up a collector and publish a
+       privacy note. Null means nothing leaves the browser: the button hands the
+       summary to the visitor's own mail client instead. Never gates the result. */
+    var CAPTURE_ENDPOINT = null;
+
+    $("roi-send-btn").addEventListener("click",function(){
+      var el=$("roi-send-email"), email=el.value.trim(), msg=$("roi-send-msg");
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        msg.className="msg err";
+        msg.textContent="That address doesn't look right — check it and try again.";
+        el.focus(); return;
+      }
+      msg.className="msg";
+      if(CAPTURE_ENDPOINT){
+        fetch(CAPTURE_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({email:email,mode:mode,preset:preset,inputs:S[mode],summary:summary()})})
+          .then(function(r){ if(!r.ok) throw new Error("bad status");
+            msg.textContent="Sent. Check your inbox in the next minute or two."; el.value=""; })
+          .catch(function(){ msg.className="msg err";
+            msg.textContent="That didn't send. Use Copy summary instead, or email info@sentrios.ai."; });
+      } else {
+        var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
+        window.location.href="mailto:"+encodeURIComponent(email)+"?subject="+
+          encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
+        msg.textContent="Opening your mail app with the summary ready to send.";
+      }
+    });
+
     /* --- mode + preset --- */
     function setMode(m){
       mode=m;
       $("roi-m-fleet").setAttribute("aria-pressed", m==="fleet");
+      $("roi-send-hint").textContent = m==="fleet"
+        ? "You'll get the full working — every line, every assumption — as plain text you can forward to your CFO. Never gated: the numbers above are yours whether you fill this in or not."
+        : "You'll get the full working — every line, every assumption — as plain text you can forward to your project team. Never gated: the numbers above are yours whether you fill this in or not.";
       $("roi-m-site").setAttribute("aria-pressed", m==="site");
       renderInputs(); render();
     }

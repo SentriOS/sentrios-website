@@ -147,6 +147,71 @@ The clearest tell is the job-site slider: at exactly $100 per stream the
 "Monitoring cash, net" line reads $0. Anyone who drags the slider looking for the
 crossover finds the rate in about four seconds.
 
+## v2.1 — changes from the review
+
+**The disclaimer is now written per mode.** The old one described the fleet model's
+50% growth discount and said nothing about the job-site side, where the discount
+had been removed entirely. Each mode now names which of its own lines are
+contractual and which are probabilistic, and the copied summary tags every line
+`[contractual]` or `[probabilistic]` to match.
+
+**"Every figure is net" is now stated precisely.** The sentence was true of this
+build — there is no gross-spend line with the cost subtracted underneath, because
+hiding the price meant collapsing them — but it read like the boilerplate from a
+version where it wasn't. The basis now says exactly why it's true: the monitoring
+line *is* the net movement, and nothing is netted off anywhere you can't see it.
+
+**A fixed 40% haircut is back on the job-site loss and reporting lines.** It's a
+constant, not a slider, so nobody can quietly discount the headline to nothing —
+but the cash-versus-risk distinction it was protecting is restored. Both lines now
+show gross, then the discount, then the net. Conservative job-site net drops from
+$29,136 to about $22,000 as a result.
+
+**The 2% miss rate no longer claims to be measured.** It was described as a
+production figure alongside the 95% accuracy and <5% false-positive numbers. Those
+are *precision*; the model monetises *recall*, and one cannot be derived from the
+other. The basis now carries a section saying so and calls 2% a planning
+assumption with a validated recall benchmark in progress. It stays locked.
+
+**Every probabilistic line shows its gross before the discount.** Previously they
+showed inputs and the discount but not the intermediate figure, so a reader could
+not check the arithmetic without doing it themselves.
+
+**The page no longer renders $0 before scripts run.** The conservative fleet result
+is hard-coded into the markup — hero, all four ledger rows with their working, and
+the three stat tiles — and an automated check asserts the static text is character
+for character what the script computes, so nothing flashes or contradicts. A
+`<noscript>` block states the defaults in plain language.
+
+**New: send this summary to yourself.** Never gated — the result is fully visible
+without it. `CAPTURE_ENDPOINT` in `app.js` is null, so nothing leaves the browser
+and the button hands the summary to the visitor's own mail client. Point it at a
+collector and it will POST `{email, mode, preset, inputs, summary}` instead, which
+is the input-distribution data the review asked for. **Publish a privacy notice
+before you enable that.**
+
+**New: banded-pricing flag.** Above 100 cameras on a single site the ledger says
+pricing converts to a monthly site fee with a camera allowance. The job-site camera
+slider went from 2–40 to 2–400 so that case is actually reachable — at 40 it was
+unreachable code.
+
+**New: null-case flag.** Enter zero theft events and the page says so, and credits
+zero loss avoidance.
+
+### Still open from the review
+
+- **Falsifiability.** "Set the incumbent miss rate to 0% and watch the benefit go
+  to zero" is the strongest answer to a skeptic, and your 10–35% floor makes it
+  unreachable. Same for the fleet: the $100 rate floor equals the price exactly, so
+  the monitoring line can never go negative and the under-price warning I built is
+  currently dead code. Both are one number away from being testable.
+- **The price is $100 here, and the review is written against $80.** Every
+  competitive argument in it — the GC multiplying 250 × $80, the margin floor —
+  is computed on the wrong number. Worth correcting before it drives a decision.
+- **Hiding it buys less than it looks like.** At exactly $100 per stream the
+  job-site monitoring line reads $0. Anyone dragging the slider finds the crossover
+  in seconds.
+
 ## Two things worth a decision before you publish
 
 1. **Aggressive-preset monitoring rate.** The fleet and job-site sliders both cap

@@ -142,22 +142,46 @@
           <h3>Your inputs</h3>
           <span class="note">type a value or drag</span>
         </div>
-        <div class="roi-card-bd" id="roi-inputs"></div>
+        <div class="roi-card-bd" id="roi-inputs"><noscript><p class="roi-noscript">The sliders need
+          JavaScript. The figures opposite are the conservative trailer-fleet default: 200 trailers,
+          70% on monitored contracts, 3 streams each, monitoring at $120 per stream per month, 15%
+          annual churn, and two technician-hours to deploy a trailer today.</p></noscript></div>
         <div class="roi-locks" id="roi-locks"></div>
       </div>
 
       <div class="roi-card">
         <div class="roi-card-hd">
-          <h3 id="roi-ledger-title">The arithmetic</h3>
-          <span class="note" id="roi-ledger-note">annual, steady state</span>
+          <h3 id="roi-ledger-title">Your gross profit, before and after</h3>
+          <span class="note" id="roi-ledger-note">140 monitored trailers &middot; 420 streams</span>
         </div>
+        <!-- Static conservative trailer-fleet default. Crawlers, link previews, no-JS
+             and the first paint all see a real number; the script overwrites it. -->
         <div class="roi-hero">
-          <span class="lbl" id="roi-hero-lbl">Net annual benefit</span>
-          <div class="big" id="roi-hero-val">$0</div>
-          <div class="sub" id="roi-hero-sub"></div>
+          <span class="lbl" id="roi-hero-lbl">Annual gross profit lift, steady state</span>
+          <div class="big pos" id="roi-hero-val">$159,600</div>
+          <div class="sub" id="roi-hero-sub">Year one including cut-over <b>$140,525</b> &middot; per trailer per month <b>$60</b></div>
         </div>
-        <div id="roi-ledger"></div>
-        <div class="roi-strip" id="roi-strip"></div>
+        <div id="roi-ledger">
+          <div class="roi-line roi-sub-total"><div class="l"><div class="t">Monitoring line in your cost of goods</div><div class="m">420 streams &times; 12 months, net of SentriOS</div></div><div class="v pos">$100,800</div></div>
+          <div class="roi-line"><div class="l"><div class="t">Contracts you stop losing</div><div class="m">14.0 trailers retained from 15% churn &times; $700 &times; 12 = $117,600, less a 50% confidence discount &mdash; probabilistic</div></div><div class="v pos">$58,800</div></div>
+          <div class="roi-line"><div class="l"><div class="t">Technician time released at cut-over</div><div class="m">140 trailers &times; 1.75 hrs saved &times; $85 &mdash; year one only</div></div><div class="v pos">$20,825</div></div>
+          <div class="roi-line roi-total"><div class="l"><div class="t">Steady-state annual lift</div><div class="m">full twelve months, rollout complete</div></div><div class="v pos">$159,600</div></div>
+        </div>
+        <div class="roi-strip" id="roi-strip">
+          <div><div class="k">Contribution margin<br>per trailer</div><div class="n">64% &rarr; 70%</div></div>
+          <div><div class="k">Trailers kept or won<br>per year</div><div class="n">14.0</div></div>
+          <div><div class="k">Three-year<br>cumulative lift</div><div class="n">$459,725</div></div>
+        </div>
+        <div class="roi-send">
+          <div class="st">Send this summary to yourself</div>
+          <div class="sh" id="roi-send-hint">You&rsquo;ll get the full working &mdash; every line, every assumption &mdash; as plain text you can forward to your CFO. Never gated: the numbers above are yours whether you fill this in or not.</div>
+          <div class="srow">
+            <input type="email" id="roi-send-email" placeholder="you@company.com" autocomplete="email" aria-label="Your email address">
+            <button type="button" class="btn btn-ghost" id="roi-send-btn">Email me this</button>
+          </div>
+          <div class="msg" id="roi-send-msg" role="status" aria-live="polite"></div>
+        </div>
+
         <div class="roi-acts">
           <button type="button" class="btn btn-gold" id="roi-copy">Copy summary</button>
           <a href="https://calendly.com/sai-sentrios/30min" class="btn btn-ghost" target="_blank" rel="noopener">Book a working session <span class="arr">&rarr;</span></a>
@@ -170,7 +194,7 @@
       <div class="roi-basis-bd" id="roi-basis"></div>
     </details>
 
-    <p class="roi-disc">These are estimates built from the inputs above, not a quotation. Actual results vary by site, camera coverage, incident profile and deployment. Growth and retention lines are probabilistic and are shown after a 50% confidence discount; monitoring savings are contractual and are shown at full value. Every figure on this page is already net of what you pay SentriOS.</p>
+    <p class="roi-disc">These are estimates built from the inputs above, not a quotation. Actual results vary by fleet, contract mix and deployment. In this model the monitoring line and the technician time are contractual and shown at full value; the three growth and retention lines are probabilistic and each carries a stated 50% confidence discount before it reaches any total. Every line is already net of what you pay SentriOS.</p>
   </div>
 </section>
 
