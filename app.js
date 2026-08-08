@@ -501,11 +501,30 @@
       else fallback();
     });
 
-    /* --- send the summary, and (optionally) learn from the inputs ---
-       CAPTURE_ENDPOINT stays null until you stand up a collector and publish a
-       privacy note. Null means nothing leaves the browser: the button hands the
-       summary to the visitor's own mail client instead. Never gates the result. */
-    var CAPTURE_ENDPOINT = null;
+    /* --- capture ---------------------------------------------------------
+       Point CAPTURE_ENDPOINT at the roi-capture Cloudflare Worker to record
+       submissions in the Airtable CRM. Null means nothing leaves the browser.
+       Either way the summary opens in the visitor's own mail client and the
+       result on screen is never gated behind the address. */
+    var CAPTURE_ENDPOINT = null;   // e.g. "https://roi-capture.<sub>.workers.dev"
+
+    function capture(email){
+      if(!CAPTURE_ENDPOINT) return;
+      var r = mode==="fleet" ? calcFleet(S.fleet) : calcSite(S.site);
+      var payload = {
+        email: email || "", mode: mode, preset: preset, inputs: S[mode],
+        headline: mode==="fleet" ? r.steady : r.net,
+        yearOne: r.y1, summary: summary(),
+        page: location.pathname, referrer: document.referrer || "",
+        company_website: ($("roi-company-website")||{}).value || ""
+      };
+      try{
+        // keepalive so the record still lands if the mail client steals focus
+        fetch(CAPTURE_ENDPOINT,{method:"POST",keepalive:true,
+          headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+          .catch(function(){});
+      }catch(e){}
+    }
 
     $("roi-send-btn").addEventListener("click",function(){
       var el=$("roi-send-email"), email=el.value.trim(), msg=$("roi-send-msg");
@@ -515,19 +534,11 @@
         el.focus(); return;
       }
       msg.className="msg";
-      if(CAPTURE_ENDPOINT){
-        fetch(CAPTURE_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({email:email,mode:mode,preset:preset,inputs:S[mode],summary:summary()})})
-          .then(function(r){ if(!r.ok) throw new Error("bad status");
-            msg.textContent="Sent. Check your inbox in the next minute or two."; el.value=""; })
-          .catch(function(){ msg.className="msg err";
-            msg.textContent="That didn't send. Use Copy summary instead, or email info@sentrios.ai."; });
-      } else {
-        var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
-        window.location.href="mailto:"+encodeURIComponent(email)+"?subject="+
-          encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
-        msg.textContent="Opening your mail app with the summary ready to send.";
-      }
+      capture(email);
+      var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
+      window.location.href="mailto:"+encodeURIComponent(email)+"?subject="+
+        encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
+      msg.textContent="Opening your mail app with the summary ready to send.";
     });
 
     /* --- mode + preset --- */
@@ -552,6 +563,18 @@
         S.fleet=copy(P.fleet[preset]); S.site=copy(P.site[preset]);
         renderInputs(); render();
       });
+    });
+
+    /* One anonymous log per visit, on leave, and only if they moved something.
+       No address attached — this is the input distribution, not a lead. */
+    var touched=false;
+    document.getElementById("roi-inputs").addEventListener("input",function(){touched=true;});
+    document.querySelectorAll("[data-roi-p], #roi-m-fleet, #roi-m-site").forEach(function(b){
+      b.addEventListener("click",function(){touched=true;});
+    });
+    var logged=false;
+    document.addEventListener("visibilitychange",function(){
+      if(document.visibilityState==="hidden" && touched && !logged){ logged=true; capture(""); }
     });
 
     setMode("fleet");

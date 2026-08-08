@@ -212,6 +212,45 @@ zero loss avoidance.
   job-site monitoring line reads $0. Anyone dragging the slider finds the crossover
   in seconds.
 
+## Capturing the submissions
+
+`CAPTURE_ENDPOINT` in `app.js` is still `null`, so nothing leaves the browser
+until you deploy the receiver in the `roi-capture/` folder and paste its URL in.
+
+An MCP connector cannot do this job — those let Claude talk to Airtable, they do
+not run in a visitor's browser. The site needs a public HTTPS endpoint, and the
+Airtable token must never appear in client JavaScript, because anyone reading the
+page source would then have write access to the whole CRM base.
+
+**What is already built.** A table called **ROI Submissions**
+(`tblqjCnK41sDnwMHx`) now exists in *SentriOS Key Accounts CRM*, with a column
+per input, the headline figures, the verbatim summary, raw JSON of every input
+so old rows survive a schema change, referrer, status and a link to Contacts.
+
+**The receiver** is a Cloudflare Worker in `roi-capture/`. It holds the token as
+a Worker secret, accepts POSTs only from sentrios.ai, drops honeypot hits
+silently, throttles by IP, clamps every number before writing, and never echoes
+an Airtable error to the browser. `npm test` runs fifteen tests against it,
+including that the token cannot leak into a response. `DEPLOY.md` is a ten-minute
+walkthrough. Use a `data.records:write`-only token scoped to that one base — the
+Worker never reads, so a stolen token would be worthless.
+
+**Two kinds of record land in the table.** A named one when somebody enters an
+address, and an anonymous one on page-leave when somebody moved a slider but
+never gave an address. The second is the input-distribution data — what the
+market actually pays per stream, real camera counts, which assumption set people
+drift toward — with no personal data attached.
+
+**The button now says "Open in my mail app."** It used to say "Email me this",
+which promised an email you do not send. The summary opens in the visitor's own
+mail client, prefilled and addressed to them; capture happens server-side either
+way. If you later add a transactional sender, change the label back.
+
+**Before switching it on:** the address plus a visitor's own operating numbers is
+personal data. The consent line under the field points at a deletion route; add a
+matching paragraph to the privacy policy covering what is stored, why, and for
+how long.
+
 ## Two things worth a decision before you publish
 
 1. **Aggressive-preset monitoring rate.** The fleet and job-site sliders both cap

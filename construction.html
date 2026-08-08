@@ -177,9 +177,11 @@
           <div class="sh" id="roi-send-hint">You&rsquo;ll get the full working &mdash; every line, every assumption &mdash; as plain text you can forward to your CFO. Never gated: the numbers above are yours whether you fill this in or not.</div>
           <div class="srow">
             <input type="email" id="roi-send-email" placeholder="you@company.com" autocomplete="email" aria-label="Your email address">
-            <button type="button" class="btn btn-ghost" id="roi-send-btn">Email me this</button>
+            <input type="text" id="roi-company-website" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+            <button type="button" class="btn btn-ghost" id="roi-send-btn">Open in my mail app</button>
           </div>
           <div class="msg" id="roi-send-msg" role="status" aria-live="polite"></div>
+          <p class="roi-consent">We keep the figures you entered so we can check these defaults against what the market actually pays, and your address so we can follow up. <a href="contact.html">Ask us</a> and we&rsquo;ll delete both.</p>
         </div>
 
         <div class="roi-acts">
