@@ -747,6 +747,8 @@ section[id], div[id]{scroll-margin-top:90px}
 .roi-consent a:hover{color:var(--gold)}
 .roi-send .msg{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--roi-gain);margin-top:9px;min-height:15px}
 .roi-send .msg.err{color:var(--roi-cost)}
+.roi-send .msg b{color:var(--txt-lt);font-weight:500}
+.roi-send .msg a{color:var(--gold);text-decoration:underline}
 
 /* ---- basis of preparation ---- */
 .roi-basis{margin-top:28px;border:1px solid var(--line-dk);border-radius:var(--r);background:rgba(20,20,24,.5);overflow:hidden}

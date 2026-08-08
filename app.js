@@ -526,19 +526,58 @@
       }catch(e){}
     }
 
+    /* A mailto: cannot be relied on. If the browser has no registered mail
+       handler — which is most people, since most people use webmail — assigning
+       location.href does nothing at all and there is no way to detect it. So the
+       summary is delivered as a file and to the clipboard, both of which always
+       work, and the mail app is offered as a link for anyone who does have one. */
+    function mailtoURL(email){
+      var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
+      return "mailto:"+encodeURIComponent(email||"")+"?subject="+
+             encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
+    }
+
+    function download(text){
+      var name = "SentriOS-ROI-"+(mode==="fleet"?"trailer-fleet":"job-sites")+".txt";
+      try{
+        var blob = new Blob([text],{type:"text/plain;charset=utf-8"});
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement("a");
+        a.href=url; a.download=name; a.style.display="none";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(url);},2000);
+        return name;
+      }catch(e){ return null; }
+    }
+
+    function quietCopy(text){
+      try{
+        if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).catch(function(){}); return true; }
+        var ta=document.createElement("textarea"); ta.value=text;
+        ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+        ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok;
+      }catch(e){ return false; }
+    }
+
     $("roi-send-btn").addEventListener("click",function(){
       var el=$("roi-send-email"), email=el.value.trim(), msg=$("roi-send-msg");
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      // the address is optional — the working is never gated behind it
+      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
         msg.className="msg err";
-        msg.textContent="That address doesn't look right — check it and try again.";
+        msg.textContent="That address doesn't look right — check it, or leave it blank.";
         el.focus(); return;
       }
-      msg.className="msg";
       capture(email);
-      var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
-      window.location.href="mailto:"+encodeURIComponent(email)+"?subject="+
-        encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
-      msg.textContent="Opening your mail app with the summary ready to send.";
+
+      var text=summary(), file=download(text), copied=quietCopy(text);
+      var parts=[];
+      if(file)   parts.push("Saved as <b>"+file+"</b>");
+      if(copied) parts.push(parts.length?"and copied to your clipboard":"Copied to your clipboard");
+      if(!parts.length) parts.push("Use <b>Copy summary</b> below to take the working with you");
+
+      msg.className="msg";
+      msg.innerHTML = parts.join(" ")+". <a href=\""+mailtoURL(email).replace(/"/g,"&quot;")+
+        "\">Open it in your mail app</a> if you have one set up.";
     });
 
     /* --- mode + preset --- */
@@ -546,8 +585,8 @@
       mode=m;
       $("roi-m-fleet").setAttribute("aria-pressed", m==="fleet");
       $("roi-send-hint").textContent = m==="fleet"
-        ? "You'll get the full working — every line, every assumption — as plain text you can forward to your CFO. Never gated: the numbers above are yours whether you fill this in or not."
-        : "You'll get the full working — every line, every assumption — as plain text you can forward to your project team. Never gated: the numbers above are yours whether you fill this in or not.";
+        ? "Every line, every assumption, as a plain-text file you can forward to your CFO. Leave an address and we'll keep a copy and follow up — the file downloads either way."
+        : "Every line, every assumption, as a plain-text file you can forward to your project team. Leave an address and we'll keep a copy and follow up — the file downloads either way.";
       $("roi-m-site").setAttribute("aria-pressed", m==="site");
       renderInputs(); render();
     }

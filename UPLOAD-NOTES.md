@@ -241,10 +241,15 @@ never gave an address. The second is the input-distribution data — what the
 market actually pays per stream, real camera counts, which assumption set people
 drift toward — with no personal data attached.
 
-**The button now says "Open in my mail app."** It used to say "Email me this",
-which promised an email you do not send. The summary opens in the visitor's own
-mail client, prefilled and addressed to them; capture happens server-side either
-way. If you later add a transactional sender, change the label back.
+**The button is "Get the full working," and the address is optional.** It briefly
+said "Open in my mail app", which did not work: assigning `location.href` to a
+`mailto:` does nothing at all when the browser has no registered mail handler,
+which is most people, because most people use webmail. There is no way to detect
+that from JavaScript, so the page was claiming success that never happened. The
+summary is now delivered as a downloaded `.txt` and copied to the clipboard —
+both work everywhere, with no handler and no third party — and the mail app is
+offered as a link underneath for anyone who does have one. Capture fires either
+way, and leaving the address blank still gets you the file.
 
 **Before switching it on:** the address plus a visitor's own operating numbers is
 personal data. The consent line under the field points at a deletion route; add a
