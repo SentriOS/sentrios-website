@@ -241,15 +241,21 @@ never gave an address. The second is the input-distribution data — what the
 market actually pays per stream, real camera counts, which assumption set people
 drift toward — with no personal data attached.
 
-**The button is "Get the full working," and the address is optional.** It briefly
-said "Open in my mail app", which did not work: assigning `location.href` to a
-`mailto:` does nothing at all when the browser has no registered mail handler,
-which is most people, because most people use webmail. There is no way to detect
-that from JavaScript, so the page was claiming success that never happened. The
-summary is now delivered as a downloaded `.txt` and copied to the clipboard —
-both work everywhere, with no handler and no third party — and the mail app is
-offered as a link underneath for anyone who does have one. Capture fires either
-way, and leaving the address blank still gets you the file.
+**The panel is an address and a button, nothing else.** No mail-app handoff, no
+download. Enter an email, press Send, and the submission lands in Airtable for
+you to send the study from. Enter also submits. Earlier versions tried to hand
+the summary to the visitor's own mail client, which silently does nothing when
+the browser has no registered mail handler — most people, since most people use
+webmail — so that path is gone entirely.
+
+**The panel hides itself while `CAPTURE_ENDPOINT` is null.** With nowhere for a
+submission to go it would be promising an email nobody receives, so it does not
+render at all until you paste the Worker URL in. Deploy the Worker, set the URL,
+and it appears. Visitors can still take the working with them via Copy summary,
+which is unaffected.
+
+**Failures are reported as failures.** A server error says so and points at
+info@sentrios.ai rather than claiming the study is on its way.
 
 **Before switching it on:** the address plus a visitor's own operating numbers is
 personal data. The consent line under the field points at a deletion route; add a

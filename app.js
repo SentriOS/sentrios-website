@@ -508,8 +508,8 @@
        result on screen is never gated behind the address. */
     var CAPTURE_ENDPOINT = null;   // e.g. "https://roi-capture.<sub>.workers.dev"
 
-    function capture(email){
-      if(!CAPTURE_ENDPOINT) return;
+    function capture(email, quiet){
+      if(!CAPTURE_ENDPOINT) return Promise.resolve();
       var r = mode==="fleet" ? calcFleet(S.fleet) : calcSite(S.site);
       var payload = {
         email: email || "", mode: mode, preset: preset, inputs: S[mode],
@@ -518,75 +518,50 @@
         page: location.pathname, referrer: document.referrer || "",
         company_website: ($("roi-company-website")||{}).value || ""
       };
-      try{
-        // keepalive so the record still lands if the mail client steals focus
-        fetch(CAPTURE_ENDPOINT,{method:"POST",keepalive:true,
-          headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-          .catch(function(){});
-      }catch(e){}
+      var req = fetch(CAPTURE_ENDPOINT,{method:"POST",keepalive:!!quiet,
+        headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      // quiet: the anonymous on-leave log, which must never surface an error
+      if(quiet) return req.catch(function(){});
+      return req.then(function(res){
+        if(!res.ok) throw new Error("store_failed");
+        return res.json().catch(function(){ return {ok:true}; });
+      }).then(function(d){ if(d && d.ok===false) throw new Error(d.error||"failed"); });
     }
 
-    /* A mailto: cannot be relied on. If the browser has no registered mail
-       handler — which is most people, since most people use webmail — assigning
-       location.href does nothing at all and there is no way to detect it. So the
-       summary is delivered as a file and to the clipboard, both of which always
-       work, and the mail app is offered as a link for anyone who does have one. */
-    function mailtoURL(email){
-      var subj = mode==="fleet" ? "SentriOS ROI — trailer fleet" : "SentriOS ROI — job sites";
-      return "mailto:"+encodeURIComponent(email||"")+"?subject="+
-             encodeURIComponent(subj)+"&body="+encodeURIComponent(summary());
+    /* The panel only appears once there is somewhere for a submission to go.
+       With CAPTURE_ENDPOINT null it stays hidden rather than promising an email
+       nobody will receive. */
+    var sendBox = $("roi-send");
+    if(CAPTURE_ENDPOINT && sendBox){
+      sendBox.hidden = false;
+      var busy = false;
+      var send = function(){
+        if(busy) return;
+        var el=$("roi-send-email"), email=el.value.trim(), msg=$("roi-send-msg"), btn=$("roi-send-btn");
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+          msg.className="msg err";
+          msg.textContent="That address doesn't look right.";
+          el.focus(); return;
+        }
+        busy=true; btn.disabled=true;
+        msg.className="msg"; msg.textContent="Sending\u2026";
+        capture(email, false).then(function(){
+          msg.className="msg";
+          msg.textContent="On its way to "+email+".";
+          el.value="";
+        }).catch(function(){
+          msg.className="msg err";
+          msg.innerHTML='That didn\u2019t send. Email us at <a href="mailto:info@sentrios.ai">info@sentrios.ai</a> and we\u2019ll send it over.';
+        }).then(function(){ busy=false; btn.disabled=false; });
+      };
+      $("roi-send-btn").addEventListener("click", send);
+      $("roi-send-email").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); send(); } });
     }
-
-    function download(text){
-      var name = "SentriOS-ROI-"+(mode==="fleet"?"trailer-fleet":"job-sites")+".txt";
-      try{
-        var blob = new Blob([text],{type:"text/plain;charset=utf-8"});
-        var url  = URL.createObjectURL(blob);
-        var a    = document.createElement("a");
-        a.href=url; a.download=name; a.style.display="none";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(function(){URL.revokeObjectURL(url);},2000);
-        return name;
-      }catch(e){ return null; }
-    }
-
-    function quietCopy(text){
-      try{
-        if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).catch(function(){}); return true; }
-        var ta=document.createElement("textarea"); ta.value=text;
-        ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
-        ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok;
-      }catch(e){ return false; }
-    }
-
-    $("roi-send-btn").addEventListener("click",function(){
-      var el=$("roi-send-email"), email=el.value.trim(), msg=$("roi-send-msg");
-      // the address is optional — the working is never gated behind it
-      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-        msg.className="msg err";
-        msg.textContent="That address doesn't look right — check it, or leave it blank.";
-        el.focus(); return;
-      }
-      capture(email);
-
-      var text=summary(), file=download(text), copied=quietCopy(text);
-      var parts=[];
-      if(file)   parts.push("Saved as <b>"+file+"</b>");
-      if(copied) parts.push(parts.length?"and copied to your clipboard":"Copied to your clipboard");
-      if(!parts.length) parts.push("Use <b>Copy summary</b> below to take the working with you");
-
-      msg.className="msg";
-      msg.innerHTML = parts.join(" ")+". <a href=\""+mailtoURL(email).replace(/"/g,"&quot;")+
-        "\">Open it in your mail app</a> if you have one set up.";
-    });
 
     /* --- mode + preset --- */
     function setMode(m){
       mode=m;
       $("roi-m-fleet").setAttribute("aria-pressed", m==="fleet");
-      $("roi-send-hint").textContent = m==="fleet"
-        ? "Every line, every assumption, as a plain-text file you can forward to your CFO. Leave an address and we'll keep a copy and follow up — the file downloads either way."
-        : "Every line, every assumption, as a plain-text file you can forward to your project team. Leave an address and we'll keep a copy and follow up — the file downloads either way.";
       $("roi-m-site").setAttribute("aria-pressed", m==="site");
       renderInputs(); render();
     }
@@ -613,7 +588,7 @@
     });
     var logged=false;
     document.addEventListener("visibilitychange",function(){
-      if(document.visibilityState==="hidden" && touched && !logged){ logged=true; capture(""); }
+      if(document.visibilityState==="hidden" && touched && !logged){ logged=true; capture("", true); }
     });
 
     setMode("fleet");
