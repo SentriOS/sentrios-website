@@ -455,7 +455,7 @@ footer address a{color:var(--gold-bright)}
 .ddbtn:hover,.dropdown:hover .ddbtn,.dropdown .ddbtn.active{color:var(--gold)}
 .ddbtn .caret{font-size:9px;transition:transform .2s}
 .dropdown:hover .ddbtn .caret{transform:rotate(180deg)}
-.ddmenu{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);min-width:230px;background:rgba(16,16,20,.98);backdrop-filter:blur(14px);border:1px solid var(--line-dk);border-radius:14px;padding:8px;margin-top:8px;opacity:0;visibility:hidden;transition:opacity .18s,transform .18s;box-shadow:0 24px 60px -24px rgba(0,0,0,.85)}
+.ddmenu{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);min-width:268px;background:rgba(16,16,20,.98);backdrop-filter:blur(14px);border:1px solid var(--line-dk);border-radius:14px;padding:8px;margin-top:8px;opacity:0;visibility:hidden;transition:opacity .18s,transform .18s;box-shadow:0 24px 60px -24px rgba(0,0,0,.85)}
 .dropdown:hover .ddmenu{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
 .ddmenu::before{content:"";position:absolute;top:-16px;left:0;right:0;height:16px}
 .ddmenu a{display:block;padding:11px 14px;border-radius:9px;font-size:14.5px;color:#E0DCD3;font-weight:500}
