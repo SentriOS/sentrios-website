@@ -811,3 +811,104 @@ section[id], div[id]{scroll-margin-top:90px}
 .brand img{height:50px}
 .foot-brand .brand img{height:46px}
 @media (max-width:680px){ .brand img{height:42px} }
+
+/* ============================================================
+   RTCC / RTIC page + 4-up audience grid            (2026-08 update)
+   ============================================================ */
+.aud-grid-4{grid-template-columns:repeat(4,1fr)}
+.aud-grid-4 .aud{padding:26px 22px}
+.aud-grid-4 .aud h3{font-size:19px}
+.aud-grid-4 .aud p{font-size:13.5px}
+.aud-grid-4 .aud .pitch{font-size:13.5px}
+
+/* two-audience blocks */
+.rt-two{margin-top:52px}
+.rt-audience{background:#fff;border:1px solid var(--line-lt);border-radius:var(--r);padding:34px 32px}
+.rt-audience .rt-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep)}
+.rt-audience h3{font-size:23px;margin:14px 0 12px;color:#100E0A}
+.rt-audience p{font-size:15px;color:#5A554A}
+.rt-list{list-style:none;margin-top:18px;display:grid;gap:11px}
+.rt-list li{position:relative;padding-left:26px;font-size:14.5px;color:#3E3A32;line-height:1.55}
+.rt-list li::before{content:"";position:absolute;left:0;top:9px;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.rt-list-lg li{font-size:15px;color:var(--mute);padding-left:28px}
+.rt-list-lg li b{color:#E8E4DB;font-weight:600}
+.rt-list-lg li::before{top:10px}
+
+/* pull quote */
+.pullquote{margin:56px auto 0;max-width:78ch;text-align:center;border-top:1px solid var(--line-lt);border-bottom:1px solid var(--line-lt);padding:34px 20px}
+.pullquote p{font-family:'Space Grotesk',sans-serif;font-size:clamp(19px,2.4vw,26px);line-height:1.35;color:#100E0A;letter-spacing:-.01em}
+.pullquote cite{display:block;margin-top:18px;font-style:normal;font-size:13px;color:#7A7466;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+/* 4-up problem grid */
+.rt-prob-grid{grid-template-columns:repeat(4,1fr)}
+.rt-prob-grid .prob{padding:26px 24px}
+.rt-prob-grid .prob h3{font-size:18px}
+.rt-prob-grid .prob p{font-size:14px}
+.rt-fix{margin-top:14px;padding-top:14px;border-top:1px solid var(--line-dk);color:#CFC9BC !important}
+.rt-fix b{color:var(--gold) !important}
+
+/* kicker under the compare block */
+.rt-kicker{margin-top:40px;text-align:center;font-size:clamp(16px,1.9vw,20px);font-style:italic;color:var(--gold-deep);max-width:80ch;margin-left:auto;margin-right:auto}
+
+/* split image + copy */
+.rt-split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.rt-split .h-sec{max-width:22ch}
+.rt-figure{margin:0}
+.rt-figure img{width:100%;border-radius:14px;border:1px solid var(--line-dk);box-shadow:0 30px 70px -30px rgba(0,0,0,.6)}
+.paper .rt-figure img,.light .rt-figure img{border-color:var(--line-lt);box-shadow:0 30px 60px -30px rgba(40,30,0,.35)}
+.rt-figure figcaption{margin-top:14px;font-size:12.5px;color:var(--mute);text-align:center;font-style:italic}
+.paper .rt-figure figcaption,.light .rt-figure figcaption{color:#7A7466}
+.rt-chips{margin-top:26px}
+.rt-note{margin-top:22px;font-size:14px;font-style:italic;color:var(--mute)}
+.paper .rt-note{color:#7A7466}
+
+/* architecture diagram */
+.rt-stack{margin-top:50px;border:1px solid var(--line-dk);border-radius:var(--r);background:rgba(20,20,24,.45);padding:26px 20px}
+.rt-stack svg{width:100%;height:auto}
+.rt-svg-h{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;fill:#F3EFE6}
+.rt-svg-s{font-family:'Inter',sans-serif;font-size:12.5px;fill:#9A968C}
+.rt-svg-lab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;fill:#9A968C}
+.rt-svg-gold{fill:var(--gold)}
+.rt-arch-grid{margin-top:26px}
+.rt-room{margin:46px 0 0}
+.rt-room img{width:100%;border-radius:14px;border:1px solid var(--line-dk)}
+.rt-room figcaption{margin-top:14px;font-size:12.5px;color:var(--mute);text-align:center;font-style:italic}
+
+/* how-we-start steps */
+.rt-steps{margin-top:46px}
+.rt-step{background:#fff;border:1px solid var(--line-lt);border-radius:var(--r);padding:26px 24px}
+.rt-step .num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--gold-deep)}
+.rt-step h3{font-size:19px;margin:12px 0 8px;color:#100E0A}
+.rt-step p{font-size:14px;color:#5A554A}
+
+.rt-integ-note{margin-top:16px;font-size:13.5px;color:var(--mute);max-width:74ch}
+
+@media(max-width:1040px){
+  .aud-grid-4{grid-template-columns:repeat(2,1fr)}
+  .rt-prob-grid{grid-template-columns:repeat(2,1fr)}
+  .rt-split{grid-template-columns:1fr;gap:38px}
+  .rt-split-rev .rt-figure{order:2}
+  .rt-arch-grid,.rt-steps{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .aud-grid-4,.rt-prob-grid,.rt-two,.rt-arch-grid,.rt-steps{grid-template-columns:1fr}
+  .rt-stack{padding:16px 10px}
+  .pullquote{padding:26px 6px}
+}
+
+/* --- review round 2 ------------------------------------------------------ */
+/* the dynamic-use-case list sits on .paper — make it readable there */
+.paper .rt-list-lg li,.light .rt-list-lg li{color:#4A463D}
+.paper .rt-list-lg li b,.light .rt-list-lg li b{color:#100E0A;font-weight:600}
+.rt-list-lg li{color:#CFC9BC}
+.rt-list-lg li b{color:#F3EFE6;font-weight:600}
+
+/* command-center banner directly under the RTCC hero */
+.rt-hero-media{padding:0 0 18px}
+.rt-hero-media .rt-room{margin:0}
+.rt-hero-media .rt-room img{max-width:940px;margin:0 auto}
+.rt-hero-media .rt-room figcaption{margin-top:12px}
+
+.rt-note-strong{color:#CFC9BC !important;font-style:normal;border-left:2px solid var(--gold);padding-left:16px}
+.paper .rt-note-strong,.light .rt-note-strong{color:#4A463D !important}
+.rt-svg-tag{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;fill:var(--gold)}
