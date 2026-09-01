@@ -385,7 +385,15 @@
    never blocks a visitor from getting the paper.
    ========================================================================= */
 (function () {
-  var PREFILL  = "";  /* <-- paste the Google Forms pre-filled link here */
+  /* Responses land in the sheet attached to this form:
+     docs.google.com/forms/d/e/1FAIpQLScPCQVFWaUgNCPJecOGdXUrn9K-oxPONUfelQLgrPLzfpbjWg */
+  var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScPCQVFWaUgNCPJecOGdXUrn9K-oxPONUfelQLgrPLzfpbjWg/viewform";
+
+  /* The one value still to fill in: the id of the Email question.
+     Open the form > three-dot menu > "Get pre-filled link" > type anything in
+     the Email box > "Get link" > "Copy link", then paste it between the quotes.
+     Any of these work:  "entry.1234567890"  |  "1234567890"  |  the whole URL. */
+  var ENTRY    = "";
   var PDF_URL  = "";  /* optional: a hosted path such as "whitepapers/SentriOS-Traditional-vs-Intelligent-Jobsite-Surveillance.pdf".
                          Leave EMPTY and the copy embedded in this file is used,
                          so there is no second file to upload and no path to break. */
@@ -404,18 +412,29 @@
       stepB  = document.getElementById('wp-step-done'),
       opener = null;
 
-  /* --- derive the Google Forms POST target + field name from the prefill URL --- */
-  var GF = (function (url) {
-    if (!url) return null;
+  /* --- work out where to POST and which field to fill --- */
+  function warn(m) { if (window.console && console.warn) console.warn('[SentriOS whitepaper] ' + m); }
+
+  var GF = (function (form, entry) {
+    entry = (entry || '').trim();
+    if (!entry) {
+      warn('emails are NOT being recorded — set ENTRY near the top of this script.');
+      return null;
+    }
+    /* accept a bare number, an entry.NNN, or a whole pre-filled URL */
+    var m = entry.match(/entry\.(\d+)/) || entry.match(/^(\d+)$/);
+    if (!m) { warn('ENTRY does not contain an entry id — emails are NOT being recorded.'); return null; }
+
+    /* if a full pre-filled URL was pasted, trust it over FORM_URL */
+    var src = /^https?:\/\//.test(entry) ? entry : form, action;
     try {
-      var u = new URL(url), entry = null;
-      u.searchParams.forEach(function (v, k) {
-        if (!entry && k.indexOf('entry.') === 0) entry = k;
-      });
-      if (!entry) return null;
-      return { action: u.origin + u.pathname.replace(/\/(viewform|edit).*$/, '/formResponse'), entry: entry };
-    } catch (e) { return null; }
-  })(PREFILL);
+      var u = new URL(src);
+      action = u.origin + u.pathname.replace(/\/(viewform|edit|formResponse)\/?$/, '') + '/formResponse';
+    } catch (e) {
+      action = String(src).split('?')[0].replace(/\/(viewform|edit|formResponse)\/?$/, '') + '/formResponse';
+    }
+    return { action: action, entry: 'entry.' + m[1] };
+  })(FORM_URL, ENTRY);
 
   /* --- fire-and-forget POST into a hidden iframe: no CORS, no page navigation --- */
   function record(addr) {
